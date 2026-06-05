@@ -6,7 +6,7 @@ This guide walks you through contributing to sdk-python and sdk-typescript. We�
 
 Looking for a place to start? Check our issues labeled “ready for contribution”—these are well-defined and ready for community work.
 
--   [SDK issues](https://github.com/strands-agents/sdk-python/issues?q=is%3Aissue+state%3Aopen+label%3A%22ready+for+contribution%22)
+-   [SDK issues](https://github.com/strands-agents/harness-sdk/issues?q=is%3Aissue+state%3Aopen+label%3A%22ready+for+contribution%22)
 
 Before starting work on any issue, check if someone is already assigned or working on it.
 
@@ -30,7 +30,7 @@ Some contributions don’t fit the core SDK. Understanding this upfront saves yo
 -   **Changes without tests** — Tests ensure quality and prevent regressions (documentation changes excepted)
 -   **Niche features** — Features serving narrow use cases belong in extensions
 
-If you’re unsure whether your contribution fits, [open a discussion](https://github.com/strands-agents/sdk-python/discussions) first. We’re happy to help you find the right path.
+If you’re unsure whether your contribution fits, [open a discussion](https://github.com/strands-agents/harness-sdk/discussions) first. We’re happy to help you find the right path.
 
 ## Set up your development environment
 
@@ -40,8 +40,8 @@ Let’s get your local environment ready for development. This process differs s
 First, we’ll clone the repository and set up the virtual environment.
 
 ```bash
-git clone https://github.com/strands-agents/sdk-python.git
-cd sdk-python/strands-py
+git clone https://github.com/strands-agents/harness-sdk.git
+cd harness-sdk/strands-py
 ```
 
 We use [hatch](https://hatch.pypa.io/) for Python development. Hatch manages virtual environments, dependencies, testing, and formatting. Enter the virtual environment and install pre-commit hooks.
@@ -77,15 +77,15 @@ hatch run prepare           # Run all checks before committing
 
 -   Use `hatch run test-integ` to run integration tests with real model providers
 -   Run `hatch test --all` to test across Python 3.10-3.13
--   Check [CONTRIBUTING.md](https://github.com/strands-agents/sdk-python/blob/main/CONTRIBUTING.md) for the full development workflow
+-   Check [CONTRIBUTING.md](https://github.com/strands-agents/harness-sdk/blob/main/CONTRIBUTING.md) for the full development workflow
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
 First, we’ll clone the repository and install dependencies.
 
 ```bash
-git clone https://github.com/strands-agents/sdk-python.git
-cd sdk-python
+git clone https://github.com/strands-agents/harness-sdk.git
+cd harness-sdk
 npm install
 ```
 
@@ -113,7 +113,7 @@ npm run format              # Format code with Prettier
 
 -   Use `npm run test:integ` to run integration tests
 -   Run `npm run test:all` to test in both Node.js and browser environments
--   Check [CONTRIBUTING.md](https://github.com/strands-agents/sdk-python/blob/main/CONTRIBUTING.md) for the full development workflow
+-   Check [CONTRIBUTING.md](https://github.com/strands-agents/harness-sdk/blob/main/CONTRIBUTING.md) for the full development workflow
 (( /tab "TypeScript" ))
 
 ## Submit your contribution
@@ -134,4 +134,4 @@ The pre-commit hooks help catch issues before you push, but you can also run che
 ## Related guides
 
 -   [Feature proposals](/docs/contribute/contributing/feature-proposals/index.md) — For significant features requiring discussion
--   [Team documentation](https://github.com/strands-agents/sdk-python/tree/main/team) — Our tenets, decisions, and API review process
+-   [Team documentation](https://github.com/strands-agents/harness-sdk/tree/main/team) — Our tenets, decisions, and API review process

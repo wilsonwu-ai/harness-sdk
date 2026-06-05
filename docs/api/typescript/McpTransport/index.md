@@ -4,7 +4,7 @@ type McpTransport = Omit<Transport, "sessionId"> & {
 };
 ```
 
-Defined in: [src/mcp.ts:28](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/mcp.ts#L28)
+Defined in: [src/mcp.ts:28](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/mcp.ts#L28)
 
 Widened transport type that accepts MCP transport implementations without requiring explicit casts.
 
@@ -14,4 +14,4 @@ Under `exactOptionalPropertyTypes`, `StreamableHTTPClientTransport` is not direc
 
 | Name | Type | Defined in |
 | --- | --- | --- |
-| `sessionId?` | `string` | [src/mcp.ts:28](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/mcp.ts#L28) |
+| `sessionId?` | `string` | [src/mcp.ts:28](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/mcp.ts#L28) |

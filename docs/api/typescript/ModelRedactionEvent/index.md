@@ -1,4 +1,4 @@
-Defined in: [src/models/streaming.ts:344](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/models/streaming.ts#L344)
+Defined in: [src/models/streaming.ts:344](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/models/streaming.ts#L344)
 
 Event emitted when guardrails block content and trigger redaction.
 
@@ -14,7 +14,7 @@ Event emitted when guardrails block content and trigger redaction.
 new ModelRedactionEvent(data): ModelRedactionEvent;
 ```
 
-Defined in: [src/models/streaming.ts:360](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/models/streaming.ts#L360)
+Defined in: [src/models/streaming.ts:360](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/models/streaming.ts#L360)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/models/streaming.ts:360](https://github.com/strands-agents/sdk-
 readonly type: "modelRedactionEvent";
 ```
 
-Defined in: [src/models/streaming.ts:348](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/models/streaming.ts#L348)
+Defined in: [src/models/streaming.ts:348](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/models/streaming.ts#L348)
 
 Discriminator for redact events.
 
@@ -50,7 +50,7 @@ Discriminator for redact events.
 readonly optional inputRedaction?: RedactInputContent;
 ```
 
-Defined in: [src/models/streaming.ts:353](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/models/streaming.ts#L353)
+Defined in: [src/models/streaming.ts:353](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/models/streaming.ts#L353)
 
 Input redaction information (when input is blocked).
 
@@ -66,7 +66,7 @@ Input redaction information (when input is blocked).
 readonly optional outputRedaction?: RedactOutputContent;
 ```
 
-Defined in: [src/models/streaming.ts:358](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/models/streaming.ts#L358)
+Defined in: [src/models/streaming.ts:358](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/models/streaming.ts#L358)
 
 Output redaction information (when output is blocked).
 

@@ -176,3 +176,13 @@ Defined in: [src/strands/types/exceptions.py:115](https://github.com/strands-age
 Exception raised when concurrent invocations are attempted on an agent instance.
 
 Agent instances maintain internal state that cannot be safely accessed concurrently. This exception is raised when an invocation is attempted while another invocation is already in progress on the same agent instance.
+
+## CheckpointException
+
+```python
+class CheckpointException(Exception)
+```
+
+Defined in: [src/strands/types/exceptions.py:126](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/types/exceptions.py#L126)
+
+Exception raised when checkpoint operations fail (e.g., incompatible schema version).

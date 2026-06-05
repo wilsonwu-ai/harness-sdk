@@ -199,7 +199,9 @@ Restore orchestrator state from a session dict.
 
 ```python
 def add_hook(callback: HookCallback,
-             event_type: type | list[type] | None = None) -> None
+             event_type: type | list[type] | None = None,
+             *,
+             order: float = HookOrder.DEFAULT) -> None
 ```
 
 Defined in: [src/strands/multiagent/base.py:258](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/base.py#L258)
@@ -212,3 +214,4 @@ Subclasses that support hooks should override this method to register the callba
 
 -   `callback` - The callback function to invoke when events of this type occur.
 -   `event_type` - The class type(s) of events this callback should handle. Can be a single type, a list of types, or None to infer from the callback’s first parameter type hint.
+-   `order` - Execution priority. Lower values execute first.

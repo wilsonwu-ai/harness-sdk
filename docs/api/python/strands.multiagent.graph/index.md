@@ -369,7 +369,9 @@ Initialize Graph with execution limits and reset behavior.
 
 ```python
 def add_hook(callback: HookCallback,
-             event_type: type | list[type] | None = None) -> None
+             event_type: type | list[type] | None = None,
+             *,
+             order: float = HookOrder.DEFAULT) -> None
 ```
 
 Defined in: [src/strands/multiagent/graph.py:498](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L498)
@@ -380,6 +382,7 @@ Register a hook callback with the graph.
 
 -   `callback` - The callback function to invoke when events of this type occur.
 -   `event_type` - The class type(s) of events this callback should handle. Can be a single type, a list of types, or None to infer from the callback’s first parameter type hint.
+-   `order` - Execution priority. Lower values execute first.
 
 #### \_\_call\_\_
 
@@ -389,7 +392,7 @@ def __call__(task: MultiAgentInput,
              **kwargs: Any) -> GraphResult
 ```
 
-Defined in: [src/strands/multiagent/graph.py:509](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L509)
+Defined in: [src/strands/multiagent/graph.py:512](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L512)
 
 Invoke the graph synchronously.
 
@@ -407,7 +410,7 @@ async def invoke_async(task: MultiAgentInput,
                        **kwargs: Any) -> GraphResult
 ```
 
-Defined in: [src/strands/multiagent/graph.py:525](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L525)
+Defined in: [src/strands/multiagent/graph.py:528](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L528)
 
 Invoke the graph asynchronously.
 
@@ -427,7 +430,7 @@ async def stream_async(task: MultiAgentInput,
                        **kwargs: Any) -> AsyncIterator[dict[str, Any]]
 ```
 
-Defined in: [src/strands/multiagent/graph.py:549](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L549)
+Defined in: [src/strands/multiagent/graph.py:552](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L552)
 
 Stream events during graph execution.
 
@@ -452,7 +455,7 @@ Dictionary events during graph execution, such as:
 def serialize_state() -> dict[str, Any]
 ```
 
-Defined in: [src/strands/multiagent/graph.py:1189](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L1189)
+Defined in: [src/strands/multiagent/graph.py:1192](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L1192)
 
 Serialize the current graph state to a dictionary.
 
@@ -462,7 +465,7 @@ Serialize the current graph state to a dictionary.
 def deserialize_state(payload: dict[str, Any]) -> None
 ```
 
-Defined in: [src/strands/multiagent/graph.py:1209](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L1209)
+Defined in: [src/strands/multiagent/graph.py:1212](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/graph.py#L1212)
 
 Restore graph state from a session dict and prepare for execution.
 

@@ -1,4 +1,4 @@
-Defined in: [src/sandbox/types.ts:32](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L32)
+Defined in: [src/sandbox/types.ts:32](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L32)
 
 Metadata about a file or directory in a sandbox.
 
@@ -12,7 +12,7 @@ Provides minimal structured information that lets tools distinguish files from d
 readonly name: string;
 ```
 
-Defined in: [src/sandbox/types.ts:33](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L33)
+Defined in: [src/sandbox/types.ts:33](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L33)
 
 ---
 
@@ -22,7 +22,7 @@ Defined in: [src/sandbox/types.ts:33](https://github.com/strands-agents/sdk-type
 readonly optional isDir?: boolean;
 ```
 
-Defined in: [src/sandbox/types.ts:34](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L34)
+Defined in: [src/sandbox/types.ts:34](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L34)
 
 ---
 
@@ -32,4 +32,4 @@ Defined in: [src/sandbox/types.ts:34](https://github.com/strands-agents/sdk-type
 readonly optional size?: number;
 ```
 
-Defined in: [src/sandbox/types.ts:35](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L35)
+Defined in: [src/sandbox/types.ts:35](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L35)

@@ -53,7 +53,7 @@ await agent.invoke('Replace "debug": false with "debug": true in /tmp/config.jso
 await agent.invoke('View lines 1-10 of /tmp/config.json')
 ```
 
-📖 [Full API Reference](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/vended-tools/file-editor/README.md)
+📖 [Full API Reference](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/vended-tools/file-editor/README.md)
 
 ---
 
@@ -82,7 +82,7 @@ await agent.invoke('Get data from https://api.example.com/users')
 await agent.invoke('Post {"name": "John"} to https://api.example.com/users')
 ```
 
-📖 [Full API Reference](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/vended-tools/http-request/README.md)
+📖 [Full API Reference](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/vended-tools/http-request/README.md)
 
 ---
 
@@ -133,7 +133,7 @@ const restoredAgent = new Agent({ tools: [notebook], sessionManager: session })
 await restoredAgent.invoke('Read the ideas notebook')
 ```
 
-📖 [Full API Reference](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/vended-tools/notebook/README.md)
+📖 [Full API Reference](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/vended-tools/notebook/README.md)
 
 ---
 
@@ -181,7 +181,7 @@ await agent.invoke('Restart the bash session')
 await agent.invoke('Run: echo $MY_VAR') // Variable will be empty
 ```
 
-📖 [Full API Reference](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/vended-tools/bash/README.md)
+📖 [Full API Reference](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/vended-tools/bash/README.md)
 
 ---
 
@@ -215,7 +215,7 @@ await agent.invoke(
 
 ## Versioning & Maintenance
 
-Vended tools ship as part of the SDK and are updated alongside it. Report bugs and feature requests in the [TypeScript SDK GitHub repository](https://github.com/strands-agents/sdk-typescript/issues).
+Vended tools ship as part of the SDK and are updated alongside it. Report bugs and feature requests in the [GitHub repository](https://github.com/strands-agents/harness-sdk/issues).
 
 Tool names are stable and will not change. In minor versions, a tool’s description, spec, or parameters may be updated to improve effectiveness — these changes are noted in SDK release notes. Pin your SDK version and test after upgrades if your workflows depend on specific tool behavior.
 

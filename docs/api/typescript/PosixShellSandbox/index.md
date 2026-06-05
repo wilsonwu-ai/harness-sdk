@@ -1,4 +1,4 @@
-Defined in: [src/sandbox/posix-shell.ts:42](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/posix-shell.ts#L42)
+Defined in: [src/sandbox/posix-shell.ts:42](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/posix-shell.ts#L42)
 
 Abstract sandbox that provides shell-based defaults for file and code operations. Assumes a POSIX-compatible shell (sh/bash) on the target.
 
@@ -36,7 +36,7 @@ abstract executeStreaming(command, options?): AsyncIterable<
 | ExecutionResult>;
 ```
 
-Defined in: [src/sandbox/base.ts:47](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L47)
+Defined in: [src/sandbox/base.ts:47](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L47)
 
 Execute a shell command, streaming output.
 
@@ -67,7 +67,7 @@ Async iterable yielding StreamChunks followed by a final ExecutionResult.
 execute(command, options?): Promise<ExecutionResult>;
 ```
 
-Defined in: [src/sandbox/base.ts:119](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L119)
+Defined in: [src/sandbox/base.ts:119](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L119)
 
 Execute a shell command and return the result.
 
@@ -101,7 +101,7 @@ executeCode(
 options?): Promise<ExecutionResult>;
 ```
 
-Defined in: [src/sandbox/base.ts:139](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L139)
+Defined in: [src/sandbox/base.ts:139](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L139)
 
 Execute source code and return the result.
 
@@ -133,7 +133,7 @@ The execution result with exit code and output.
 readText(path): Promise<string>;
 ```
 
-Defined in: [src/sandbox/base.ts:157](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L157)
+Defined in: [src/sandbox/base.ts:157](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L157)
 
 Read a text file from the sandbox filesystem.
 
@@ -163,7 +163,7 @@ The file contents decoded as a UTF-8 string.
 writeText(path, content): Promise<void>;
 ```
 
-Defined in: [src/sandbox/base.ts:170](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L170)
+Defined in: [src/sandbox/base.ts:170](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L170)
 
 Write a text file to the sandbox filesystem.
 
@@ -197,7 +197,7 @@ executeCodeStreaming(
 | ExecutionResult, void, undefined>;
 ```
 
-Defined in: [src/sandbox/posix-shell.ts:43](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/posix-shell.ts#L43)
+Defined in: [src/sandbox/posix-shell.ts:43](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/posix-shell.ts#L43)
 
 Execute source code via a language interpreter, streaming output.
 
@@ -227,7 +227,7 @@ Async iterable yielding StreamChunks followed by a final ExecutionResult.
 readFile(path): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/sandbox/posix-shell.ts:56](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/posix-shell.ts#L56)
+Defined in: [src/sandbox/posix-shell.ts:56](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/posix-shell.ts#L56)
 
 Read a file from the sandbox filesystem as raw bytes.
 
@@ -261,7 +261,7 @@ Error if the file does not exist.
 writeFile(path, content): Promise<void>;
 ```
 
-Defined in: [src/sandbox/posix-shell.ts:64](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/posix-shell.ts#L64)
+Defined in: [src/sandbox/posix-shell.ts:64](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/posix-shell.ts#L64)
 
 Write raw bytes to a file in the sandbox filesystem.
 
@@ -290,7 +290,7 @@ Implementations should create parent directories if they do not exist. Use [writ
 removeFile(path): Promise<void>;
 ```
 
-Defined in: [src/sandbox/posix-shell.ts:75](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/posix-shell.ts#L75)
+Defined in: [src/sandbox/posix-shell.ts:75](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/posix-shell.ts#L75)
 
 Remove a file from the sandbox filesystem.
 
@@ -320,7 +320,7 @@ Error if the file does not exist.
 listFiles(path): Promise<FileInfo[]>;
 ```
 
-Defined in: [src/sandbox/posix-shell.ts:82](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/posix-shell.ts#L82)
+Defined in: [src/sandbox/posix-shell.ts:82](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/posix-shell.ts#L82)
 
 List files in a sandbox directory.
 

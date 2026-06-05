@@ -2,6 +2,18 @@ Hook registry system for managing event callbacks in the Strands Agent SDK.
 
 This module provides the core infrastructure for the typed hook system, enabling composable extension of agent functionality through strongly-typed event callbacks. The registry manages the mapping between event types and their associated callback functions, supporting both individual callback registration and bulk registration via hook provider objects.
 
+## HookOrder
+
+```python
+class HookOrder()
+```
+
+Defined in: [src/strands/hooks/registry.py:27](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L27)
+
+Named constants for hook execution priority.
+
+Lower values execute first. Hooks with the same order preserve registration order.
+
 ## BaseHookEvent
 
 ```python
@@ -9,7 +21,7 @@ This module provides the core infrastructure for the typed hook system, enabling
 class BaseHookEvent()
 ```
 
-Defined in: [src/strands/hooks/registry.py:26](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L26)
+Defined in: [src/strands/hooks/registry.py:47](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L47)
 
 Base class for all hook events.
 
@@ -20,7 +32,7 @@ Base class for all hook events.
 def should_reverse_callbacks() -> bool
 ```
 
-Defined in: [src/strands/hooks/registry.py:30](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L30)
+Defined in: [src/strands/hooks/registry.py:51](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L51)
 
 Determine if callbacks for this event should be invoked in reverse order.
 
@@ -34,7 +46,7 @@ False by default. Override to return True for events that should invoke callback
 def __post_init__() -> None
 ```
 
-Defined in: [src/strands/hooks/registry.py:50](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L50)
+Defined in: [src/strands/hooks/registry.py:71](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L71)
 
 Disallow writes to non-approved properties.
 
@@ -44,7 +56,7 @@ Disallow writes to non-approved properties.
 def __setattr__(name: str, value: Any) -> None
 ```
 
-Defined in: [src/strands/hooks/registry.py:56](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L56)
+Defined in: [src/strands/hooks/registry.py:77](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L77)
 
 Prevent setting attributes on hook events.
 
@@ -59,7 +71,7 @@ Prevent setting attributes on hook events.
 class HookEvent(BaseHookEvent)
 ```
 
-Defined in: [src/strands/hooks/registry.py:72](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L72)
+Defined in: [src/strands/hooks/registry.py:93](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L93)
 
 Base class for single agent hook events.
 
@@ -82,7 +94,7 @@ Generic for invoking events - non-contravariant to enable returning events.
 class HookProvider(Protocol)
 ```
 
-Defined in: [src/strands/hooks/registry.py:90](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L90)
+Defined in: [src/strands/hooks/registry.py:111](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L111)
 
 Protocol for objects that provide hook callbacks to an agent.
 
@@ -105,7 +117,7 @@ agent = Agent(hooks=[MyHookProvider()])
 def register_hooks(registry: "HookRegistry", **kwargs: Any) -> None
 ```
 
-Defined in: [src/strands/hooks/registry.py:108](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L108)
+Defined in: [src/strands/hooks/registry.py:129](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L129)
 
 Register callback functions for specific event types.
 
@@ -120,7 +132,7 @@ Register callback functions for specific event types.
 class HookCallback(Protocol, Generic[TEvent])
 ```
 
-Defined in: [src/strands/hooks/registry.py:118](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L118)
+Defined in: [src/strands/hooks/registry.py:139](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L139)
 
 Protocol for callback functions that handle hook events.
 
@@ -144,7 +156,7 @@ async def my_callback(event: StartRequestEvent) -> None:
 def __call__(event: TEvent) -> None | Awaitable[None]
 ```
 
-Defined in: [src/strands/hooks/registry.py:137](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L137)
+Defined in: [src/strands/hooks/registry.py:158](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L158)
 
 Handle a hook event.
 
@@ -158,7 +170,7 @@ Handle a hook event.
 class HookRegistry()
 ```
 
-Defined in: [src/strands/hooks/registry.py:146](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L146)
+Defined in: [src/strands/hooks/registry.py:167](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L167)
 
 Registry for managing hook callbacks associated with event types.
 
@@ -172,7 +184,7 @@ The registry handles callback ordering, including reverse ordering for cleanup e
 def __init__() -> None
 ```
 
-Defined in: [src/strands/hooks/registry.py:157](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L157)
+Defined in: [src/strands/hooks/registry.py:178](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L178)
 
 Initialize an empty hook registry.
 
@@ -180,10 +192,12 @@ Initialize an empty hook registry.
 
 ```python
 def add_callback(event_type: type[TEvent] | list[type[TEvent]] | None,
-                 callback: HookCallback[TEvent]) -> None
+                 callback: HookCallback[TEvent],
+                 *,
+                 order: float = HookOrder.DEFAULT) -> None
 ```
 
-Defined in: [src/strands/hooks/registry.py:161](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L161)
+Defined in: [src/strands/hooks/registry.py:182](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L182)
 
 Register a callback function for a specific event type.
 
@@ -195,6 +209,7 @@ If `event_type` is a list, the callback will be registered for each event type i
 
 -   `event_type` - The lifecycle event type(s) this callback should handle. Can be a single type, a list of types, or None to infer from type hints.
 -   `callback` - The callback function to invoke when events of this type occur.
+-   `order` - Execution priority. Lower values execute first.
 
 **Raises**:
 
@@ -229,7 +244,7 @@ registry.add_callback([BeforeModelCallEvent, AfterModelCallEvent], multi_handler
 def add_hook(hook: HookProvider) -> None
 ```
 
-Defined in: [src/strands/hooks/registry.py:252](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L252)
+Defined in: [src/strands/hooks/registry.py:277](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L277)
 
 Register all callbacks from a hook provider.
 
@@ -257,7 +272,7 @@ async def invoke_callbacks_async(
         event: TInvokeEvent) -> tuple[TInvokeEvent, list[Interrupt]]
 ```
 
-Defined in: [src/strands/hooks/registry.py:274](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L274)
+Defined in: [src/strands/hooks/registry.py:299](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L299)
 
 Invoke all registered callbacks for the given event.
 
@@ -291,7 +306,7 @@ def invoke_callbacks(
         event: TInvokeEvent) -> tuple[TInvokeEvent, list[Interrupt]]
 ```
 
-Defined in: [src/strands/hooks/registry.py:320](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L320)
+Defined in: [src/strands/hooks/registry.py:345](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L345)
 
 Invoke all registered callbacks for the given event.
 
@@ -325,7 +340,7 @@ registry.invoke_callbacks(event)
 def has_callbacks() -> bool
 ```
 
-Defined in: [src/strands/hooks/registry.py:367](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L367)
+Defined in: [src/strands/hooks/registry.py:392](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L392)
 
 Check if the registry has any registered callbacks.
 
@@ -347,11 +362,13 @@ def get_callbacks_for(
         event: TEvent) -> Generator[HookCallback[TEvent], None, None]
 ```
 
-Defined in: [src/strands/hooks/registry.py:381](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L381)
+Defined in: [src/strands/hooks/registry.py:406](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/hooks/registry.py#L406)
 
 Get callbacks registered for the given event in the appropriate order.
 
-This method returns callbacks in registration order for normal events, or reverse registration order for events that have should\_reverse\_callbacks=True. This enables proper cleanup ordering for teardown events.
+For normal events, callbacks are returned in order priority (lower first), with registration order preserved within the same priority.
+
+For reversed events (should\_reverse\_callbacks=True), order priority still applies (lower first), but within the same priority group, registration order is reversed.
 
 **Arguments**:
 

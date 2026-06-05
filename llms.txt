@@ -32,11 +32,13 @@
     - [community-tools-package](https://strandsagents.com/docs/user-guide/concepts/tools/community-tools-package/index.md)
     - [vended-tools](https://strandsagents.com/docs/user-guide/concepts/tools/vended-tools/index.md)
   - Plugins
-    - [plugins](https://strandsagents.com/docs/user-guide/concepts/plugins/index.md)
+    - [Overview](https://strandsagents.com/docs/user-guide/concepts/plugins/index.md)
     - [skills](https://strandsagents.com/docs/user-guide/concepts/plugins/skills/index.md)
     - [steering](https://strandsagents.com/docs/user-guide/concepts/plugins/steering/index.md)
     - [context-offloader](https://strandsagents.com/docs/user-guide/concepts/plugins/context-offloader/index.md)
-  - [interventions](https://strandsagents.com/docs/user-guide/concepts/agents/interventions/index.md)
+  - Interventions
+    - [Overview](https://strandsagents.com/docs/user-guide/concepts/agents/interventions/index.md)
+    - [human-in-the-loop](https://strandsagents.com/docs/user-guide/concepts/agents/human-in-the-loop/index.md)
   - Streaming
     - [async-iterators](https://strandsagents.com/docs/user-guide/concepts/streaming/async-iterators/index.md)
     - [callback-handlers](https://strandsagents.com/docs/user-guide/concepts/streaming/callback-handlers/index.md)
@@ -153,7 +155,6 @@
 
 ## Examples
 
-- [cli-reference-agent](https://strandsagents.com/docs/examples/python/cli-reference-agent/index.md)
 - [weather_forecaster](https://strandsagents.com/docs/examples/python/weather_forecaster/index.md)
 - [memory_agent](https://strandsagents.com/docs/examples/python/memory_agent/index.md)
 - [file_operations](https://strandsagents.com/docs/examples/python/file_operations/index.md)
@@ -190,6 +191,7 @@
 - Plugins
   - [agent-control](https://strandsagents.com/docs/community/plugins/agent-control/index.md)
   - [agentcore-payments](https://strandsagents.com/docs/community/plugins/agentcore-payments/index.md)
+  - [agentcore-tool-search](https://strandsagents.com/docs/community/plugins/agentcore-tool-search/index.md)
   - [datadog-ai-guard](https://strandsagents.com/docs/community/plugins/datadog-ai-guard/index.md)
   - [s3-vectors-memory](https://strandsagents.com/docs/community/plugins/s3-vectors-memory/index.md)
 - Model Providers

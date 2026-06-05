@@ -1,4 +1,4 @@
-Defined in: [src/sandbox/base.ts:35](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L35)
+Defined in: [src/sandbox/base.ts:35](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L35)
 
 Abstract execution environment.
 
@@ -32,7 +32,7 @@ abstract executeStreaming(command, options?): AsyncIterable<
 | ExecutionResult>;
 ```
 
-Defined in: [src/sandbox/base.ts:47](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L47)
+Defined in: [src/sandbox/base.ts:47](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L47)
 
 Execute a shell command, streaming output.
 
@@ -64,7 +64,7 @@ abstract executeCodeStreaming(
 | ExecutionResult>;
 ```
 
-Defined in: [src/sandbox/base.ts:57](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L57)
+Defined in: [src/sandbox/base.ts:57](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L57)
 
 Execute source code via a language interpreter, streaming output.
 
@@ -90,7 +90,7 @@ Async iterable yielding StreamChunks followed by a final ExecutionResult.
 abstract readFile(path): Promise<Uint8Array<ArrayBufferLike>>;
 ```
 
-Defined in: [src/sandbox/base.ts:73](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L73)
+Defined in: [src/sandbox/base.ts:73](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L73)
 
 Read a file from the sandbox filesystem as raw bytes.
 
@@ -120,7 +120,7 @@ Error if the file does not exist.
 abstract writeFile(path, content): Promise<void>;
 ```
 
-Defined in: [src/sandbox/base.ts:84](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L84)
+Defined in: [src/sandbox/base.ts:84](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L84)
 
 Write raw bytes to a file in the sandbox filesystem.
 
@@ -145,7 +145,7 @@ Implementations should create parent directories if they do not exist. Use [writ
 abstract removeFile(path): Promise<void>;
 ```
 
-Defined in: [src/sandbox/base.ts:92](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L92)
+Defined in: [src/sandbox/base.ts:92](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L92)
 
 Remove a file from the sandbox filesystem.
 
@@ -171,7 +171,7 @@ Error if the file does not exist.
 abstract listFiles(path): Promise<FileInfo[]>;
 ```
 
-Defined in: [src/sandbox/base.ts:105](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L105)
+Defined in: [src/sandbox/base.ts:105](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L105)
 
 List files in a sandbox directory.
 
@@ -201,7 +201,7 @@ Error if the directory does not exist.
 execute(command, options?): Promise<ExecutionResult>;
 ```
 
-Defined in: [src/sandbox/base.ts:119](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L119)
+Defined in: [src/sandbox/base.ts:119](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L119)
 
 Execute a shell command and return the result.
 
@@ -231,7 +231,7 @@ executeCode(
 options?): Promise<ExecutionResult>;
 ```
 
-Defined in: [src/sandbox/base.ts:139](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L139)
+Defined in: [src/sandbox/base.ts:139](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L139)
 
 Execute source code and return the result.
 
@@ -259,7 +259,7 @@ The execution result with exit code and output.
 readText(path): Promise<string>;
 ```
 
-Defined in: [src/sandbox/base.ts:157](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L157)
+Defined in: [src/sandbox/base.ts:157](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L157)
 
 Read a text file from the sandbox filesystem.
 
@@ -285,7 +285,7 @@ The file contents decoded as a UTF-8 string.
 writeText(path, content): Promise<void>;
 ```
 
-Defined in: [src/sandbox/base.ts:170](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/base.ts#L170)
+Defined in: [src/sandbox/base.ts:170](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/base.ts#L170)
 
 Write a text file to the sandbox filesystem.
 

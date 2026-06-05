@@ -24,12 +24,12 @@ Next we’ll install the `strands-agents` SDK package:
 pip install strands-agents
 ```
 
-The Strands Agents SDK additionally offers the [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) ([GitHub](https://github.com/strands-agents/tools)) and [`strands-agents-builder`](https://pypi.org/project/strands-agents-builder/) ([GitHub](https://github.com/strands-agents/agent-builder)) packages for development. The [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) package is a community-driven project that provides a set of tools for your agents to use, bridging the gap between large language models and practical applications. The [`strands-agents-builder`](https://pypi.org/project/strands-agents-builder/) package provides an agent that helps you to build your own Strands agents and tools.
+The Strands Agents SDK additionally offers the [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) ([GitHub](https://github.com/strands-agents/tools)) package for development. The [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) package is a community-driven project that provides a set of tools for your agents to use, bridging the gap between large language models and practical applications.
 
-Let’s install those development packages too:
+Let’s install that development package too:
 
 ```bash
-pip install strands-agents-tools strands-agents-builder
+pip install strands-agents-tools
 ```
 
 ### Strands MCP Server (Optional)
@@ -543,7 +543,6 @@ Ready to learn more? Check out these resources:
 
 -   [Examples](/docs/examples/index.md) - Examples for many use cases, multi-agent systems, autonomous agents, and more
 -   [Community Supported Tools](/docs/user-guide/concepts/tools/community-tools-package/index.md) - The `strands-agents-tools` package provides many powerful example tools for your agents to use during development
--   [Strands Agent Builder](https://github.com/strands-agents/agent-builder) - Use the accompanying `strands-agents-builder` agent builder to harness the power of LLMs to generate your own tools and agents
 -   [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) - Learn how Strands agents work under the hood
 -   [State & Sessions](/docs/user-guide/concepts/agents/state/index.md) - Understand how agents maintain context and state across a conversation or workflow
 -   [Multi-agent](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) - Orchestrate multiple agents together as one system, with each agent completing specialized tasks

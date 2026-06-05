@@ -21,7 +21,7 @@ async def event_loop_cycle(
         limits: Limits | None = None) -> AsyncGenerator[TypedEvent, None]
 ```
 
-Defined in: [src/strands/event\_loop/event\_loop.py:157](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/event_loop/event_loop.py#L157)
+Defined in: [src/strands/event\_loop/event\_loop.py:179](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/event_loop/event_loop.py#L179)
 
 Execute a single cycle of the event loop.
 
@@ -51,12 +51,15 @@ This core function processes a single conversation turn, handling model inferenc
 
 **Yields**:
 
-Model and tool stream events. The last event is a tuple containing:
+Model and tool stream events. The final `EventLoopStopEvent` payload (`event["stop"]`) is a 7-tuple:
 
--   StopReason: Reason the model stopped generating (e.g., “tool\_use”)
+-   StopReason: Reason the model stopped generating (e.g., “tool\_use”, “checkpoint”)
 -   Message: The generated message from the model
 -   EventLoopMetrics: Updated metrics for the event loop
 -   Any: Updated request state
+-   Sequence\[Interrupt\] | None: Interrupts raised during the cycle, if any
+-   BaseModel | None: Structured output result, if any
+-   Checkpoint | None: Checkpoint captured when stop\_reason == “checkpoint”
 
 **Raises**:
 
@@ -73,7 +76,7 @@ async def recurse_event_loop(
         limits: Limits | None = None) -> AsyncGenerator[TypedEvent, None]
 ```
 
-Defined in: [src/strands/event\_loop/event\_loop.py:344](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/event_loop/event_loop.py#L344)
+Defined in: [src/strands/event\_loop/event\_loop.py:400](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/event_loop/event_loop.py#L400)
 
 Make a recursive call to event\_loop\_cycle with the current state.
 

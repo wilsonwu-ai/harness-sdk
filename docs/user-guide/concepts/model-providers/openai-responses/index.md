@@ -269,7 +269,7 @@ model = OpenAIResponsesModel(
 )
 
 agent = Agent(model=model)
-response = agent("Using deepwiki, what language is the strands-agents/sdk-python repo written in?")
+response = agent("Using deepwiki, what language is the strands-agents/harness-sdk repo written in?")
 ```
 (( /tab "Python" ))
 
@@ -292,7 +292,7 @@ const model = new OpenAIModel({
 
 const agent = new Agent({ model })
 const response = await agent.invoke(
-  'Using deepwiki, what language is the strands-agents/sdk-typescript repo written in?'
+  'Using deepwiki, what language is the strands-agents/harness-sdk repo written in?'
 )
 ```
 (( /tab "TypeScript" ))

@@ -235,7 +235,9 @@ Initialize Swarm with agents and configuration.
 
 ```python
 def add_hook(callback: HookCallback,
-             event_type: type | list[type] | None = None) -> None
+             event_type: type | list[type] | None = None,
+             *,
+             order: float = HookOrder.DEFAULT) -> None
 ```
 
 Defined in: [src/strands/multiagent/swarm.py:318](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L318)
@@ -246,6 +248,7 @@ Register a hook callback with the swarm.
 
 -   `callback` - The callback function to invoke when events of this type occur.
 -   `event_type` - The class type(s) of events this callback should handle. Can be a single type, a list of types, or None to infer from the callback’s first parameter type hint.
+-   `order` - Execution priority. Lower values execute first.
 
 #### \_\_call\_\_
 
@@ -255,7 +258,7 @@ def __call__(task: MultiAgentInput,
              **kwargs: Any) -> SwarmResult
 ```
 
-Defined in: [src/strands/multiagent/swarm.py:329](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L329)
+Defined in: [src/strands/multiagent/swarm.py:332](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L332)
 
 Invoke the swarm synchronously.
 
@@ -273,7 +276,7 @@ async def invoke_async(task: MultiAgentInput,
                        **kwargs: Any) -> SwarmResult
 ```
 
-Defined in: [src/strands/multiagent/swarm.py:344](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L344)
+Defined in: [src/strands/multiagent/swarm.py:347](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L347)
 
 Invoke the swarm asynchronously.
 
@@ -293,7 +296,7 @@ async def stream_async(task: MultiAgentInput,
                        **kwargs: Any) -> AsyncIterator[dict[str, Any]]
 ```
 
-Defined in: [src/strands/multiagent/swarm.py:368](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L368)
+Defined in: [src/strands/multiagent/swarm.py:371](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L371)
 
 Stream events during swarm execution.
 
@@ -319,7 +322,7 @@ Dictionary events during swarm execution, such as:
 def serialize_state() -> dict[str, Any]
 ```
 
-Defined in: [src/strands/multiagent/swarm.py:973](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L973)
+Defined in: [src/strands/multiagent/swarm.py:976](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L976)
 
 Serialize the current swarm state to a dictionary.
 
@@ -329,7 +332,7 @@ Serialize the current swarm state to a dictionary.
 def deserialize_state(payload: dict[str, Any]) -> None
 ```
 
-Defined in: [src/strands/multiagent/swarm.py:1003](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L1003)
+Defined in: [src/strands/multiagent/swarm.py:1006](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/multiagent/swarm.py#L1006)
 
 Restore swarm state from a session dict and prepare for execution.
 

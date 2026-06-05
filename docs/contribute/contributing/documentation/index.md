@@ -1,4 +1,4 @@
-Good documentation helps developers succeed with Strands. We welcome contributions that make our docs clearer, more complete, or more helpful. Our documentation lives in the `site/` directory of the [Strands SDK repository](https://github.com/strands-agents/sdk-python).
+Good documentation helps developers succeed with Strands. We welcome contributions that make our docs clearer, more complete, or more helpful. Our documentation lives in the `site/` directory of the [Strands SDK repository](https://github.com/strands-agents/harness-sdk).
 
 ## What we accept
 
@@ -18,8 +18,8 @@ Let’s get the docs running locally so you can preview your changes as you work
 
 ```bash
 # Clone the repository
-git clone https://github.com/strands-agents/sdk-python.git
-cd sdk-python/site
+git clone https://github.com/strands-agents/harness-sdk.git
+cd harness-sdk/site
 
 # Install dependencies
 npm install

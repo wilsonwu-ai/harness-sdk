@@ -100,6 +100,7 @@ Plugins extend agent behavior by hooking into lifecycle events. Use these to add
 | --- | --- | --- | --- |
 | [Agent Control](/docs/community/plugins/agent-control/index.md) | Runtime policy enforcement for agents | ✅ | ❌ |
 | [Amazon AgentCore Payments](/docs/community/plugins/agentcore-payments/index.md) | Automated payment processing for agents using Amazon Bedrock AgentCore | ✅ | ❌ |
+| [Amazon AgentCore Tool Search](/docs/community/plugins/agentcore-tool-search/index.md) | Semantic tool discovery for agents using Amazon Bedrock AgentCore Gateway | ✅ | ❌ |
 | [Datadog AI Guard](/docs/community/plugins/datadog-ai-guard/index.md) | Real-time AI security with Datadog AI Guard | ✅ | ❌ |
 | [S3 Vectors Memory](/docs/community/plugins/s3-vectors-memory/index.md) | Long-term semantic memory for Strands Agents backed by Amazon S3 Vectors | ✅ | ❌ |
 
@@ -1680,16 +1681,6 @@ Source: https://strandsagents.com/docs/community/model-providers/vllm/index.md
 
 ## xAI
 
-Community Contribution
-
-This is a community-maintained package that is not owned or supported by the Strands team. Validate and review the package before using it in your project.
-
-Have your own integration? [We’d love to add it here too!](https://github.com/strands-agents/docs/issues/new?assignees=&labels=enhancement&projects=&template=content_addition.yml&title=%5BContent+Addition%5D%3A+)
-
-Language Support
-
-This provider is only supported in Python.
-
 [xAI](https://x.ai/) is an AI company that develops the Grok family of large language models with advanced reasoning capabilities. The [`strands-xai`](https://pypi.org/project/strands-xai/) package ([GitHub](https://github.com/Cerrix/strands-xai)) provides a community-maintained integration for the Strands Agents SDK, enabling seamless use of xAI’s Grok models with powerful server-side tools including real-time X platform access, web search, and code execution.
 
 ## Installation
@@ -2320,6 +2311,136 @@ See the [AgentCore SDK documentation](https://github.com/aws/bedrock-agentcore-s
 -   [Strands Plugins documentation](/docs/user-guide/concepts/plugins/index.md)
 
 Source: https://strandsagents.com/docs/community/plugins/agentcore-payments/index.md
+
+---
+
+## Amazon AgentCore Tool Search
+
+The [AgentCore Tool Search plugin](https://github.com/aws/bedrock-agentcore-sdk-python/tree/main/src/bedrock_agentcore/gateway/integrations/strands/plugins/agentcore_tool_search) enables semantic tool discovery for Strands Agents using [Amazon Bedrock AgentCore Gateway](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-using-mcp-semantic-search.html). It allows agents to dynamically load only the relevant tools for each invocation by deriving user intent from conversation history, even when hundreds of tools are registered on the gateway.
+
+The plugin derives user intent from conversation history and queries AgentCore Gateway’s semantic search to load only the relevant tools for each invocation. Intent derivation is pluggable — the built-in provider reuses the parent agent’s model by default, or you can supply your own `IntentProvider` implementation for full control over how intent is classified.
+
+## Installation
+
+```bash
+pip install 'bedrock-agentcore[strands-agents]'
+```
+
+## Usage
+
+```python
+from mcp_proxy_for_aws.client import aws_iam_streamablehttp_client
+from strands import Agent
+from strands.tools.mcp import MCPClient
+from bedrock_agentcore.gateway.integrations.strands.plugins import AgentCoreToolSearchPlugin
+
+mcp_client = MCPClient(lambda: aws_iam_streamablehttp_client(
+    endpoint="https://<gateway-id>.gateway.bedrock-agentcore.<region>.amazonaws.com/mcp",
+    aws_region="us-east-1",
+    aws_service="bedrock-agentcore",
+))
+
+with mcp_client:
+    agent = Agent(plugins=[AgentCoreToolSearchPlugin(mcp_client=mcp_client)])
+    agent("Find me afternoon flights to New York")
+```
+
+## How It Works
+
+On each agent invocation:
+
+1.  **User query** — the user sends a query to the Strands agent
+2.  **Hook** — the agent triggers the `AgentCoreToolSearchPlugin` before model invocation
+3.  **Derive intent** — the `IntentProvider` sends the last N messages from conversation history to the configured LLM to produce a concise intent string
+4.  **Search gateway** — the intent is passed to AgentCore Gateway’s `x_amz_bedrock_agentcore_search` tool to obtain the most relevant tools
+5.  **Invoke LLM** — the agent invokes the LLM with the user query along with the matched tools from registered MCP targets (Lambda, API Gateway, MCP Server)
+
+Previously loaded tools are cleared before each search, so the agent always has the most relevant tools available.
+
+## Intent Provider
+
+An `IntentProvider` is responsible for analyzing conversation messages and producing a concise intent string that drives tool search. The plugin calls `derive_intent(messages, model)` before each invocation to determine what tools to load.
+
+### StrandsIntentProvider
+
+`StrandsIntentProvider` uses a Strands Agent to classify the last few conversation messages into a concise intent string. By default it uses the parent agent’s model.
+
+**Basic usage (uses the agent’s model automatically):**
+
+```python
+from bedrock_agentcore.gateway.integrations.strands.plugins import AgentCoreToolSearchPlugin
+
+agent = Agent(plugins=[
+    AgentCoreToolSearchPlugin(mcp_client=mcp_client)
+])
+```
+
+**With a custom model for intent classification:**
+
+```python
+from strands.models.bedrock import BedrockModel
+from bedrock_agentcore.gateway.integrations.strands.plugins import AgentCoreToolSearchPlugin
+from bedrock_agentcore.gateway.integrations.strands.plugins.agentcore_tool_search.intent_providers import StrandsIntentProvider
+
+intent_model = BedrockModel(model_id="us.anthropic.claude-haiku-4-5-20251001-v1:0")
+agent = Agent(plugins=[
+    AgentCoreToolSearchPlugin(
+        mcp_client=mcp_client,
+        intent_provider=StrandsIntentProvider(model=intent_model),
+    )
+])
+```
+
+**With a custom system prompt:**
+
+```python
+from bedrock_agentcore.gateway.integrations.strands.plugins import AgentCoreToolSearchPlugin
+from bedrock_agentcore.gateway.integrations.strands.plugins.agentcore_tool_search.intent_providers import StrandsIntentProvider
+
+agent = Agent(plugins=[
+    AgentCoreToolSearchPlugin(
+        mcp_client=mcp_client,
+        intent_provider=StrandsIntentProvider(
+            system_prompt="Classify the user's intent in one sentence. Focus on the action, not details."
+        ),
+    )
+])
+```
+
+### Custom Intent Provider
+
+You can provide your own intent derivation strategy by subclassing `IntentProvider`:
+
+```python
+from bedrock_agentcore.gateway.integrations.strands.plugins.agentcore_tool_search.intent_providers import IntentProvider
+
+class MyIntentProvider(IntentProvider):
+    def derive_intent(self, messages: list[dict], model=None) -> str:
+        # custom logic to derive intent
+        return "intent string"
+
+agent = Agent(plugins=[
+    AgentCoreToolSearchPlugin(
+        mcp_client=mcp_client,
+        intent_provider=MyIntentProvider(),
+    )
+])
+```
+
+## Prerequisites
+
+-   An AgentCore Gateway with [semantic search](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-using-mcp-semantic-search.html) enabled
+-   Tools registered on the gateway with descriptions
+-   AWS credentials with access to the gateway
+
+For more details, see the [AgentCore Gateway documentation](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-building.html).
+
+## References
+
+-   [AgentCore SDK](https://github.com/aws/bedrock-agentcore-sdk-python)
+-   [AgentCore Gateway documentation](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-building.html)
+
+Source: https://strandsagents.com/docs/community/plugins/agentcore-tool-search/index.md
 
 ---
 
@@ -3574,7 +3695,7 @@ Source: https://strandsagents.com/docs/community/tools/strands-telegram-listener
 
 The [Universal Tool Calling Protocol (UTCP)](https://www.utcp.io/) is a lightweight, secure, and scalable standard that enables AI agents to discover and call tools directly using their native protocols - **no wrapper servers required**. UTCP acts as a “manual” that tells agents how to call your tools directly, extending OpenAPI for AI agents while maintaining full backward compatibility.
 
-This community plugin integrates UTCP with [Strands Agents SDK](https://github.com/strands-agents/sdk-python), providing standardized tool discovery and execution capabilities.
+This community plugin integrates UTCP with Strands Agents SDK, providing standardized tool discovery and execution capabilities.
 
 ## Installation
 
@@ -3661,9 +3782,7 @@ You can share your tools, model providers, hooks, and session managers with the 
 ## Community resources
 
 -   [Community Catalog](/docs/community/community-packages/index.md) — Discover community-built extensions
--   GitHub Discussions — Ask questions, share ideas
-    -   [Python](https://github.com/strands-agents/sdk-python/discussions)
-    -   [TypeScript](https://github.com/strands-agents/sdk-typescript/discussions)
+-   [GitHub Discussions](https://github.com/strands-agents/harness-sdk/discussions) — Ask questions, share ideas
 -   [Roadmap](https://github.com/orgs/strands-agents/projects/8/views/1) — See what we’re working on
 -   [Development Tenets](https://github.com/strands-agents/docs/blob/main/team/TENETS.md) — Principles that guide SDK design
 -   [Decision Records](https://github.com/strands-agents/docs/blob/main/team/DECISIONS.md) — Past design decisions with rationale
@@ -3684,7 +3803,7 @@ This guide walks you through contributing to sdk-python and sdk-typescript. We�
 
 Looking for a place to start? Check our issues labeled “ready for contribution”—these are well-defined and ready for community work.
 
--   [SDK issues](https://github.com/strands-agents/sdk-python/issues?q=is%3Aissue+state%3Aopen+label%3A%22ready+for+contribution%22)
+-   [SDK issues](https://github.com/strands-agents/harness-sdk/issues?q=is%3Aissue+state%3Aopen+label%3A%22ready+for+contribution%22)
 
 Before starting work on any issue, check if someone is already assigned or working on it.
 
@@ -3708,7 +3827,7 @@ Some contributions don’t fit the core SDK. Understanding this upfront saves yo
 -   **Changes without tests** — Tests ensure quality and prevent regressions (documentation changes excepted)
 -   **Niche features** — Features serving narrow use cases belong in extensions
 
-If you’re unsure whether your contribution fits, [open a discussion](https://github.com/strands-agents/sdk-python/discussions) first. We’re happy to help you find the right path.
+If you’re unsure whether your contribution fits, [open a discussion](https://github.com/strands-agents/harness-sdk/discussions) first. We’re happy to help you find the right path.
 
 ## Set up your development environment
 
@@ -3718,8 +3837,8 @@ Let’s get your local environment ready for development. This process differs s
 First, we’ll clone the repository and set up the virtual environment.
 
 ```bash
-git clone https://github.com/strands-agents/sdk-python.git
-cd sdk-python/strands-py
+git clone https://github.com/strands-agents/harness-sdk.git
+cd harness-sdk/strands-py
 ```
 
 We use [hatch](https://hatch.pypa.io/) for Python development. Hatch manages virtual environments, dependencies, testing, and formatting. Enter the virtual environment and install pre-commit hooks.
@@ -3755,15 +3874,15 @@ hatch run prepare           # Run all checks before committing
 
 -   Use `hatch run test-integ` to run integration tests with real model providers
 -   Run `hatch test --all` to test across Python 3.10-3.13
--   Check [CONTRIBUTING.md](https://github.com/strands-agents/sdk-python/blob/main/CONTRIBUTING.md) for the full development workflow
+-   Check [CONTRIBUTING.md](https://github.com/strands-agents/harness-sdk/blob/main/CONTRIBUTING.md) for the full development workflow
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
 First, we’ll clone the repository and install dependencies.
 
 ```bash
-git clone https://github.com/strands-agents/sdk-python.git
-cd sdk-python
+git clone https://github.com/strands-agents/harness-sdk.git
+cd harness-sdk
 npm install
 ```
 
@@ -3791,7 +3910,7 @@ npm run format              # Format code with Prettier
 
 -   Use `npm run test:integ` to run integration tests
 -   Run `npm run test:all` to test in both Node.js and browser environments
--   Check [CONTRIBUTING.md](https://github.com/strands-agents/sdk-python/blob/main/CONTRIBUTING.md) for the full development workflow
+-   Check [CONTRIBUTING.md](https://github.com/strands-agents/harness-sdk/blob/main/CONTRIBUTING.md) for the full development workflow
 (( /tab "TypeScript" ))
 
 ## Submit your contribution
@@ -3812,7 +3931,7 @@ The pre-commit hooks help catch issues before you push, but you can also run che
 ## Related guides
 
 -   [Feature proposals](/docs/contribute/contributing/feature-proposals/index.md) — For significant features requiring discussion
--   [Team documentation](https://github.com/strands-agents/sdk-python/tree/main/team) — Our tenets, decisions, and API review process
+-   [Team documentation](https://github.com/strands-agents/harness-sdk/tree/main/team) — Our tenets, decisions, and API review process
 
 Source: https://strandsagents.com/docs/contribute/contributing/core-sdk/index.md
 
@@ -3820,7 +3939,7 @@ Source: https://strandsagents.com/docs/contribute/contributing/core-sdk/index.md
 
 ## Contributing to Documentation
 
-Good documentation helps developers succeed with Strands. We welcome contributions that make our docs clearer, more complete, or more helpful. Our documentation lives in the `site/` directory of the [Strands SDK repository](https://github.com/strands-agents/sdk-python).
+Good documentation helps developers succeed with Strands. We welcome contributions that make our docs clearer, more complete, or more helpful. Our documentation lives in the `site/` directory of the [Strands SDK repository](https://github.com/strands-agents/harness-sdk).
 
 ## What we accept
 
@@ -3840,8 +3959,8 @@ Let’s get the docs running locally so you can preview your changes as you work
 
 ```bash
 # Clone the repository
-git clone https://github.com/strands-agents/sdk-python.git
-cd sdk-python/site
+git clone https://github.com/strands-agents/harness-sdk.git
+cd harness-sdk/site
 
 # Install dependencies
 npm install
@@ -4029,7 +4148,7 @@ The design document process helps align on requirements, explore alternatives, a
 
 1.  **Check the [roadmap](https://github.com/orgs/strands-agents/projects/8/views/1)** — See if your idea aligns with our direction and isn’t already planned
 2.  **Open an issue first** — Describe the problem you’re trying to solve. We need to validate the problem is worth solving before you invest time in a detailed proposal
-3.  **Create a design document** — Once we agree the problem is worth solving, submit a PR to the [`designs` folder](https://github.com/strands-agents/sdk-python/tree/main/designs) using the template there. Reference the issue in your design document
+3.  **Create a design document** — Once we agree the problem is worth solving, submit a PR to the [`designs` folder](https://github.com/strands-agents/harness-sdk/tree/main/designs) using the template there. Reference the issue in your design document
 4.  **Gather feedback** — We’ll review and discuss with you, asking clarifying questions
 5.  **Get approval** — When we merge the design document, that’s your go-ahead to implement
 6.  **Implement** — Follow the [SDK contribution process](/docs/contribute/contributing/core-sdk/index.md)
@@ -4037,14 +4156,14 @@ The design document process helps align on requirements, explore alternatives, a
 
 ## Design document template
 
-See the full template in the [designs folder README](https://github.com/strands-agents/sdk-python/blob/main/designs/README.md#design-document-template).
+See the full template in the [designs folder README](https://github.com/strands-agents/harness-sdk/blob/main/designs/README.md#design-document-template).
 
 **Tips for effective proposals:**
 
 -   Focus on the problem first, solution comes second
 -   Include concrete examples showing current pain and proposed improvement
 -   Be open to feedback, the best solution might differ from your initial idea
--   Align with our [development tenets](https://github.com/strands-agents/sdk-python/blob/main/team/TENETS.md)
+-   Align with our [development tenets](https://github.com/strands-agents/harness-sdk/blob/main/team/TENETS.md)
 
 Source: https://strandsagents.com/docs/contribute/contributing/feature-proposals/index.md
 
@@ -4075,7 +4194,6 @@ A collection of sample implementations to help you get started with Strands Agen
 | --- | --- | --- | --- |
 | [Structured Output](/docs/examples/structured_output/index.md) | Type-safe, validated responses | ✅ | ✅ |
 | [Agents Workflows](/docs/examples/python/agents_workflows/index.md) | Sequential agent workflow pattern | ✅ |  |
-| [CLI Reference Agent](/docs/examples/python/cli-reference-agent/index.md) | Command-line reference agent | ✅ |  |
 | [File Operations](/docs/examples/python/file_operations/index.md) | File manipulation capabilities | ✅ |  |
 | [Graph Loops](/docs/examples/python/graph_loops_example/index.md) | Graph orchestration with loops | ✅ |  |
 | [Knowledge Base Agent](/docs/examples/python/knowledge_base_agent/index.md) | Knowledge base retrieval | ✅ |  |
@@ -4217,7 +4335,7 @@ researcher_agent = Agent(
 )
 ```
 
-Without this suppression, the default [callback\_handler](https://github.com/strands-agents/sdk-python/blob/main/src/strands/handlers/callback_handler.py) would print all outputs to stdout, creating a cluttered experience with duplicate information from each agent’s thinking process and tool calls. Suppressing the output creates a clean user experience by preventing intermediate outputs while still allowing responses to be captured programmatically and enabling proper information flow between agents. Instead of verbose agent outputs, the code provides concise progress feedback through simple print statements:
+Without this suppression, the default [callback\_handler](https://github.com/strands-agents/harness-sdk/blob/main/strands-py/src/strands/handlers/callback_handler.py) would print all outputs to stdout, creating a cluttered experience with duplicate information from each agent’s thinking process and tool calls. Suppressing the output creates a clean user experience by preventing intermediate outputs while still allowing responses to be captured programmatically and enabling proper information flow between agents. Instead of verbose agent outputs, the code provides concise progress feedback through simple print statements:
 
 ```python
 print("\nProcessing: '{user_input}'")
@@ -4307,150 +4425,6 @@ Here are some ways to extend this agents workflow example:
 5.  **Add Memory**: Implement session memory so the system remembers previous research sessions
 
 Source: https://strandsagents.com/docs/examples/python/agents_workflows/index.md
-
----
-
-## A CLI reference implementation of a Strands agent
-
-The Strands CLI is a reference implementation built on top of the Strands SDK. It provides a terminal-based interface for interacting with Strands agents, demonstrating how to make a fully interactive streaming application with the Strands SDK.
-
-The Strands CLI is Open-Source and available [strands-agents/agent-builder](https://github.com/strands-agents/agent-builder#custom-model-provider).
-
-## Prerequisites
-
-In addition to the prerequisites listed for [examples](/docs/examples/index.md), this example requires the following:
-
--   Python package installer (`pip`)
--   [pipx](https://github.com/pypa/pipx) for isolated Python package installation
--   Git
-
-## Standard Installation
-
-To install the Strands CLI:
-
-```bash
-# Install
-pipx install strands-agents-builder
-
-# Run Strands CLI
-strands
-```
-
-## Manual Installation
-
-If you prefer to install manually:
-
-```bash
-# Clone repository
-git clone https://github.com/strands-agents/agent-builder /path/to/custom/location
-
-# Create virtual environment
-cd /path/to/custom/location
-python -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate
-
-# Install dependencies
-pip install -e .
-
-# Create symlink
-sudo ln -sf /path/to/custom/location/venv/bin/strands /usr/local/bin/strands
-```
-
-## CLI Verification
-
-To verify your CLI installation:
-
-```bash
-# Run Strands CLI with a simple query
-strands "Hello, Strands!"
-```
-
-## Command Line Arguments
-
-| Argument | Description | Example |
-| --- | --- | --- |
-| `query` | Question or command for Strands | `strands "What's the current time?"` |
-| `--kb`, `--knowledge-base` | `KNOWLEDGE_BASE_ID` | Knowledge base ID to use for retrievals |
-| `--model-provider` | `MODEL_PROVIDER` | Model provider to use for inference |
-| `--model-config` | `MODEL_CONFIG` | Model config as JSON string or path |
-
-## Interactive Mode Commands
-
-When running Strands in interactive mode, you can use these special commands:
-
-| Command | Description |
-| --- | --- |
-| `exit` | Exit Strands CLI |
-| `!command` | Execute shell command directly |
-
-## Shell Integration
-
-Strands CLI integrates with your shell in several ways:
-
-### Direct Shell Commands
-
-Execute shell commands directly by prefixing with `!`:
-
-```bash
-> !ls -la
-> !git status
-> !docker ps
-```
-
-### Natural Language Shell Commands
-
-Ask Strands to run shell commands using natural language:
-
-```bash
-> Show me all running processes
-> Create a new directory called "project" and initialize a git repository there
-> Find all Python files modified in the last week
-```
-
-## Environment Variables
-
-Strands CLI respects these environment variables for basic configuration:
-
-| Variable | Description | Default |
-| --- | --- | --- |
-| `STRANDS_SYSTEM_PROMPT` | System instructions for the agent | `You are a helpful agent.` |
-| `STRANDS_KNOWLEDGE_BASE_ID` | Knowledge base for memory integration | None |
-
-Example:
-
-```bash
-export STRANDS_KNOWLEDGE_BASE_ID="YOUR_KB_ID"
-strands "What were our key decisions last week?"
-```
-
-## Command Line Arguments
-
-Command line arguments override any configuration from files or environment variables:
-
-```bash
-# Enable memory with knowledge base
-strands --kb your-kb-id
-```
-
-## Custom Model Provider
-
-You can configure strands to use a different model provider with specific settings by passing in the following arguments:
-
-```bash
-strands --model-provider <NAME> --model-config <JSON|FILE>
-```
-
-As an example, if you wanted to use the packaged Ollama provider with a specific model id, you would run:
-
-```bash
-strands --model-provider ollama --model-config '{"model_id": "llama3.3"}'
-```
-
-Strands is packaged with `bedrock` and `ollama` as providers.
-
-Source: https://strandsagents.com/docs/examples/python/cli-reference-agent/index.md
 
 ---
 
@@ -6424,7 +6398,7 @@ Python functions that behave like standard functions but are evaluated by AI age
 
 ## Contributing
 
-Have an experimental idea that pushes AI agents forward? Labs is designed for innovation from across the community. Check the [contributing guide](https://github.com/strands-agents/sdk-python/blob/main/CONTRIBUTING.md) to get started.
+Have an experimental idea that pushes AI agents forward? Labs is designed for innovation from across the community. Check the [contributing guide](https://github.com/strands-agents/harness-sdk/blob/main/CONTRIBUTING.md) to get started.
 
 Source: https://strandsagents.com/docs/labs/index.md
 
@@ -7947,14 +7921,14 @@ Understanding the loop deeply makes these advanced patterns more approachable. T
 ## Related pages
 
 - [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) (3 shared tags)
-- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (3 shared tags)
 - [Interrupts](/docs/user-guide/concepts/interrupts/index.md) (3 shared tags)
-- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
+- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (3 shared tags)
 - [Plugins](/docs/user-guide/concepts/plugins/index.md) (2 shared tags)
+- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
 - [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
 - [Retry Strategies](/docs/user-guide/concepts/agents/retry-strategies/index.md) (1 shared tag)
 - [Bidirectional Streaming Hooks](/docs/user-guide/concepts/bidirectional-streaming/hooks/index.md) (1 shared tag)
-- [Agents as Tools with Strands Agents SDK](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) (1 shared tag)
+- [Human in the Loop](/docs/user-guide/concepts/agents/human-in-the-loop/index.md) (1 shared tag)
 - [Steering](/docs/user-guide/concepts/plugins/steering/index.md) (1 shared tag)
 
 Source: https://strandsagents.com/docs/user-guide/concepts/agents/agent-loop/index.md
@@ -8420,7 +8394,7 @@ Because `BeforeModelCallEvent` triggers before every model call including calls 
 
 ### Context Window Limit
 
-The threshold check requires the model’s context window size. The SDK auto-populates `contextWindowLimit` from built-in lookup tables ([Python](https://github.com/strands-agents/sdk-python/blob/main/src/strands/models/_defaults.py), [TypeScript](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/models/defaults.ts)) for known models. You can override it manually for models not in the lookup table:
+The threshold check requires the model’s context window size. The SDK auto-populates `contextWindowLimit` from built-in lookup tables ([Python](https://github.com/strands-agents/harness-sdk/blob/main/strands-py/src/strands/models/_defaults.py), [TypeScript](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/models/defaults.ts)) for known models. You can override it manually for models not in the lookup table:
 
 (( tab "Python" ))
 ```python
@@ -8474,7 +8448,7 @@ To create a custom conversation manager, implement the [`ConversationManager`](/
 4.  `register_hooks` (optional): Override this method to integrate with [hooks](/docs/user-guide/concepts/agents/hooks/index.md). This enables proactive context management patterns, such as trimming context before model calls. Always call `super().register_hooks` when overriding.
     
 
-See the [SlidingWindowConversationManager](https://github.com/strands-agents/sdk-python/blob/main/src/strands/agent/conversation_manager/sliding_window_conversation_manager.py) implementation as a reference example.
+See the [SlidingWindowConversationManager](https://github.com/strands-agents/harness-sdk/blob/main/strands-py/src/strands/agent/conversation_manager/sliding_window_conversation_manager.py) implementation as a reference example.
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
@@ -8541,7 +8515,7 @@ class MyManager extends ConversationManager {
 }
 ```
 
-See the [SlidingWindowConversationManager](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/conversation-manager/sliding-window-conversation-manager.ts) implementation as a reference example.
+See the [SlidingWindowConversationManager](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/conversation-manager/sliding-window-conversation-manager.ts) implementation as a reference example.
 (( /tab "TypeScript" ))
 
 ## Related pages
@@ -8970,10 +8944,33 @@ Most event properties are read-only to prevent unintended modifications. However
 ### Callback Ordering
 
 (( tab "Python" ))
-After event callbacks run in reverse registration order for cleanup symmetry:
+By default, After event callbacks run in reverse registration order for cleanup symmetry. You can override this with explicit priority using the `order` option — lower values run first.
 
--   **Before**: A, B, C (registration order)
--   **After**: C, B, A (reverse registration order)
+The SDK exports convenience presets that mark where the SDK’s own hooks run, so you can position yours relative to them:
+
+-   `HookOrder.SDK_FIRST` (-100) — where the SDK’s earliest hooks run
+-   `HookOrder.DEFAULT` (0) — implicit when no order is specified
+-   `HookOrder.SDK_LAST` (100) — where the SDK’s latest hooks run
+
+These are not enforced bounds — any numeric value works. Use values beyond them (e.g. `SDK_FIRST - 1`) to run before or after the SDK’s hooks, or `float('-inf')`/`float('inf')` for guaranteed absolute ordering.
+
+```python
+from strands import Agent
+from strands.hooks import BeforeModelCallEvent, HookOrder
+
+agent = Agent()
+
+def early_hook(event: BeforeModelCallEvent) -> None:
+    print("I run first")
+
+def late_hook(event: BeforeModelCallEvent) -> None:
+    print("I run last")
+
+agent.add_hook(early_hook, order=HookOrder.SDK_FIRST)
+agent.add_hook(late_hook, order=HookOrder.SDK_LAST)
+```
+
+Within the same order group, Before events preserve registration order and After events reverse it.
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
@@ -10140,17 +10137,244 @@ const agent = new Agent({ plugins: [new LoggingPlugin()] })
 ## Related pages
 
 - [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) (3 shared tags)
-- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (3 shared tags)
 - [Interrupts](/docs/user-guide/concepts/interrupts/index.md) (3 shared tags)
-- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
+- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (3 shared tags)
 - [Plugins](/docs/user-guide/concepts/plugins/index.md) (2 shared tags)
+- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
 - [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
 - [Retry Strategies](/docs/user-guide/concepts/agents/retry-strategies/index.md) (1 shared tag)
 - [Bidirectional Streaming Hooks](/docs/user-guide/concepts/bidirectional-streaming/hooks/index.md) (1 shared tag)
-- [Agents as Tools with Strands Agents SDK](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) (1 shared tag)
+- [Human in the Loop](/docs/user-guide/concepts/agents/human-in-the-loop/index.md) (1 shared tag)
 - [Steering](/docs/user-guide/concepts/plugins/steering/index.md) (1 shared tag)
 
 Source: https://strandsagents.com/docs/user-guide/concepts/agents/hooks/index.md
+
+---
+
+## Human in the Loop
+
+The `HumanInTheLoop` intervention handler pauses agent execution before tool calls to request human approval. It provides a configurable, drop-in way to add human oversight without writing custom interrupt logic. Pass it to `interventions` and choose how you want to collect the human’s response.
+
+## How It Works
+
+The handler uses the [`confirm` action](/docs/user-guide/concepts/agents/interventions/index.md) to pause for human input. Under the hood it builds on the SDK’s [interrupt mechanism](/docs/user-guide/concepts/interrupts/index.md), but abstracts away the manual interrupt/resume loop when you provide an `ask` option.
+
+```mermaid
+flowchart LR
+    A[Tool call] --> B{Allowed?}
+    B -->|Yes| C[Execute]
+    B -->|No| D{Trusted?}
+    D -->|Yes| C
+    D -->|No| E{Human approves?}
+    E -->|Yes| C
+    E -->|No| F[Cancel]
+```
+
+## Usage
+
+### Interrupt/Resume Mode (Default)
+
+Without an `ask` option, the handler raises an interrupt and the agent pauses. The caller presents the interrupt to the user, collects their response, and resumes the agent. This is the same [interrupt/resume pattern](/docs/user-guide/concepts/interrupts/index.md#hooks) used throughout the SDK. For stateless deployments, combine with a [session manager](/docs/user-guide/concepts/agents/session-management/index.md) to persist state between requests.
+
+```typescript
+import { Agent, tool, InterruptResponseContent } from '@strands-agents/sdk'
+import { HumanInTheLoop } from '@strands-agents/sdk/vended-interventions/hitl'
+import { z } from 'zod'
+
+const deleteFiles = tool({
+  name: 'delete_files',
+  description: 'Delete files at the given paths',
+  inputSchema: z.object({ paths: z.array(z.string()) }),
+  callback: (input) => `Deleted ${input.paths.length} files`,
+})
+
+const agent = new Agent({
+  tools: [deleteFiles],
+  interventions: [new HumanInTheLoop()],
+})
+
+// Agent pauses with stopReason 'interrupt' when a tool needs approval
+let result = await agent.invoke('Delete the temp files')
+
+if (result.stopReason === 'interrupt') {
+  // Present the interrupt to the user (web UI, Slack, etc.)
+  console.log(result.interrupts![0].reason)
+
+  // Resume with the human's response
+  result = await agent.invoke([
+    new InterruptResponseContent({
+      interruptId: result.interrupts![0].id,
+      response: 'yes', // 'y', 'yes', or true → approved
+    }),
+  ])
+}
+```
+
+### Stdio Mode
+
+For CLI applications, pass `ask: 'stdio'` to prompt the user inline via Node.js readline. The agent blocks until the user responds, so no interrupt handling is needed on the caller side.
+
+```typescript
+import { Agent, tool } from '@strands-agents/sdk'
+import { HumanInTheLoop } from '@strands-agents/sdk/vended-interventions/hitl'
+import { z } from 'zod'
+
+// const deleteFiles = tool({ ... }) — same as above
+
+const agent = new Agent({
+  tools: [deleteFiles],
+  interventions: [new HumanInTheLoop({ ask: 'stdio' })],
+})
+
+await agent.invoke('Delete the temp files')
+// Terminal prompt:
+// Tool "delete_files" requires human approval. Input: {...} (y/n):
+```
+
+### Custom UI Callback
+
+For web UIs, Slack bots, or other custom interfaces, pass an async function to `ask`. The function receives a prompt string describing the tool call and must return the user’s response.
+
+```typescript
+import { Agent, tool } from '@strands-agents/sdk'
+import { HumanInTheLoop } from '@strands-agents/sdk/vended-interventions/hitl'
+import { z } from 'zod'
+
+// const deleteFiles = tool({ ... }) — same as above
+
+const agent = new Agent({
+  tools: [deleteFiles],
+  interventions: [
+    new HumanInTheLoop({
+      ask: async (prompt) => {
+        // Your UI: Slack DM, web modal, push notification, etc.
+        return await askUserViaSlack(prompt)
+      },
+    }),
+  ],
+})
+
+await agent.invoke('Delete the temp files')
+```
+
+## Configuration
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `allowedTools` | `string[]` | `undefined` | Tools that bypass approval. Supports `'*'` (all) and `'!toolName'` (negation). |
+| `enableTrust` | `boolean` | `false` | When `true`, trust responses are remembered for the session. |
+| `evaluateTrust` | Function | Accepts `'t'` or `'trust'` | Custom validator for trust responses. Only evaluated when `enableTrust` is `true`. |
+| `evaluate` | Function | Accepts `true`, `'y'`, or `'yes'` | Custom validator for approval responses. |
+| `ask` | Function or `'stdio'` | `undefined` | Pass an async function for custom UIs, `'stdio'` for CLI readline, or omit for interrupt/resume. |
+
+### Allowed Tools
+
+Use `allowedTools` to skip approval for safe, read-only tools:
+
+```typescript
+import { Agent, tool } from '@strands-agents/sdk'
+import { HumanInTheLoop } from '@strands-agents/sdk/vended-interventions/hitl'
+import { z } from 'zod'
+
+// const deleteFiles = tool({ ... }) — same as above
+// const readFile = tool({ ... })
+
+const agent = new Agent({
+  tools: [readFile, deleteFiles],
+  interventions: [
+    new HumanInTheLoop({
+      ask: 'stdio',
+      // Pattern syntax:
+      //   'read_file'             → runs without approval
+      //   '*'                     → all tools run freely (disables handler)
+      //   ['*', '!delete_files']  → all except delete_files
+      allowedTools: ['read_file'],
+    }),
+  ],
+})
+
+await agent.invoke('Read config.json then delete /tmp/old-logs')
+// Only delete_files prompts; read_file executes immediately
+```
+
+### Trust Mode
+
+When `enableTrust` is `true`, a human can respond with `'t'` or `'trust'` to approve the current tool call AND remember that decision for the rest of the session. Subsequent calls to the same tool skip the prompt entirely. Trust works in all modes: interrupt/resume, stdio, and custom callbacks.
+
+Trust state is stored in `agent.appState` and persists across turns within a session but resets when the agent is re-created. Negated tools (`'!toolName'`) cannot be trusted and always prompt.
+
+```typescript
+import { Agent, tool } from '@strands-agents/sdk'
+import { HumanInTheLoop } from '@strands-agents/sdk/vended-interventions/hitl'
+import { z } from 'zod'
+
+// const deleteFiles = tool({ ... }) — same as above
+
+const agent = new Agent({
+  tools: [deleteFiles],
+  interventions: [
+    new HumanInTheLoop({
+      ask: 'stdio',
+      enableTrust: true,
+    }),
+  ],
+})
+
+await agent.invoke('Delete all log files in /tmp')
+// First call: user responds 't' → approved AND remembered
+// Subsequent calls: no prompt needed for the session
+```
+
+### Custom Evaluate
+
+By default, the handler accepts `true`, `'y'`, or `'yes'` as approval. Use `evaluate` to define your own approval logic, for example requiring the user to type “confirm”:
+
+```typescript
+import { Agent, tool } from '@strands-agents/sdk'
+import { HumanInTheLoop } from '@strands-agents/sdk/vended-interventions/hitl'
+import { z } from 'zod'
+
+// const deleteFiles = tool({ ... }) — same as above
+
+const agent = new Agent({
+  tools: [deleteFiles],
+  interventions: [
+    new HumanInTheLoop({
+      ask: 'stdio',
+      // Only approve if the user types "confirm"
+      evaluate: (response) =>
+        typeof response === 'string' && response.toLowerCase() === 'confirm',
+    }),
+  ],
+})
+
+await agent.invoke('Delete the temp files')
+// Prompt: Tool "delete_files" requires human approval. Input: {...}
+// User must type "confirm" to approve (not just "y" or "yes")
+```
+
+## When to Use
+
+Use `HumanInTheLoop` when you want tool-level approval gating with minimal code: it handles allow-lists, trust, and collection mode out of the box. Use [raw interrupts](/docs/user-guide/concepts/interrupts/index.md) when you need full control: custom interrupt shapes, multi-step interactions, or workflows beyond simple approve/deny.
+
+## Related Topics
+
+-   [Interventions](/docs/user-guide/concepts/agents/interventions/index.md): The intervention handler framework that HITL is built on
+-   [Interrupts](/docs/user-guide/concepts/interrupts/index.md): Low-level interrupt/resume mechanism
+-   [Agent State](/docs/user-guide/concepts/agents/state/index.md): How trust decisions persist via `appState`
+-   [Session Management](/docs/user-guide/concepts/agents/session-management/index.md): Persisting interrupt state across sessions
+
+## Related pages
+
+- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (2 shared tags)
+- [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
+- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (1 shared tag)
+- [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) (1 shared tag)
+- [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) (1 shared tag)
+- [Agents as Tools with Strands Agents SDK](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) (1 shared tag)
+- [Interrupts](/docs/user-guide/concepts/interrupts/index.md) (1 shared tag)
+
+Source: https://strandsagents.com/docs/user-guide/concepts/agents/human-in-the-loop/index.md
 
 ---
 
@@ -10403,6 +10627,7 @@ Interventions return typed actions that the framework interprets. This enables:
 
 ## Related topics
 
+-   [Human in the Loop](/docs/user-guide/concepts/agents/human-in-the-loop/index.md) — Ready-to-use intervention handler for tool approval workflows
 -   [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) — Low-level event callbacks for observing and modifying agent behavior
 -   [Plugins](/docs/user-guide/concepts/plugins/index.md) — Bundle related hooks and tools into reusable modules
 -   [Interrupts](/docs/user-guide/concepts/interrupts/index.md) — The interrupt/resume system that `confirm()` builds on
@@ -10412,12 +10637,12 @@ Interventions return typed actions that the framework interprets. This enables:
 - [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) (3 shared tags)
 - [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) (3 shared tags)
 - [Interrupts](/docs/user-guide/concepts/interrupts/index.md) (3 shared tags)
-- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
+- [Human in the Loop](/docs/user-guide/concepts/agents/human-in-the-loop/index.md) (2 shared tags)
 - [Plugins](/docs/user-guide/concepts/plugins/index.md) (2 shared tags)
+- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
 - [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
 - [Retry Strategies](/docs/user-guide/concepts/agents/retry-strategies/index.md) (1 shared tag)
 - [Bidirectional Streaming Hooks](/docs/user-guide/concepts/bidirectional-streaming/hooks/index.md) (1 shared tag)
-- [Agents as Tools with Strands Agents SDK](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) (1 shared tag)
 - [Steering](/docs/user-guide/concepts/plugins/steering/index.md) (1 shared tag)
 
 Source: https://strandsagents.com/docs/user-guide/concepts/agents/interventions/index.md
@@ -10838,10 +11063,10 @@ See [Hooks](/docs/user-guide/concepts/agents/hooks/index.md#model-call-retry) fo
 - [Detectors](/docs/user-guide/evals-sdk/detectors/index.md) (1 shared tag)
 - [Failure Detection](/docs/user-guide/evals-sdk/detectors/failure_detection/index.md) (1 shared tag)
 - [Operating Agents in Production](/docs/user-guide/deploy/operating-agents-in-production/index.md) (1 shared tag)
-- [Root Cause Analysis](/docs/user-guide/evals-sdk/detectors/root_cause_analysis/index.md) (1 shared tag)
-- [Session Diagnosis](/docs/user-guide/evals-sdk/detectors/diagnosis/index.md) (1 shared tag)
 - [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) (1 shared tag)
 - [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) (1 shared tag)
+- [Root Cause Analysis](/docs/user-guide/evals-sdk/detectors/root_cause_analysis/index.md) (1 shared tag)
+- [Session Diagnosis](/docs/user-guide/evals-sdk/detectors/diagnosis/index.md) (1 shared tag)
 
 Source: https://strandsagents.com/docs/user-guide/concepts/agents/retry-strategies/index.md
 
@@ -17063,8 +17288,8 @@ Strands enforces the following rules for interrupts in graph:
 - [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) (3 shared tags)
 - [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (3 shared tags)
 - [Retry Strategies](/docs/user-guide/concepts/agents/retry-strategies/index.md) (2 shared tags)
-- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
 - [Plugins](/docs/user-guide/concepts/plugins/index.md) (2 shared tags)
+- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
 - [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
 - [Bidirectional Streaming Hooks](/docs/user-guide/concepts/bidirectional-streaming/hooks/index.md) (1 shared tag)
 - [Detectors](/docs/user-guide/evals-sdk/detectors/index.md) (1 shared tag)
@@ -19238,7 +19463,7 @@ For more complex implementations, you may want to create helper methods to organ
         return None
 ```
 
-> Note: `stream` must be implemented async. If your client does not support async invocation, you may consider wrapping the relevant calls in a thread so as not to block the async event loop. For an example on how to achieve this, you can check out the [BedrockModel](https://github.com/strands-agents/sdk-python/blob/main/src/strands/models/bedrock.py) provider implementation.
+> Note: `stream` must be implemented async. If your client does not support async invocation, you may consider wrapping the relevant calls in a thread so as not to block the async event loop. For an example on how to achieve this, you can check out the [BedrockModel](https://github.com/strands-agents/harness-sdk/blob/main/strands-py/src/strands/models/bedrock.py) provider implementation.
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
@@ -19675,11 +19900,12 @@ The built-in `get_config` and `update_config` methods allow for the model’s co
 ## Related pages
 
 - [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (1 shared tag)
+- [Human in the Loop](/docs/user-guide/concepts/agents/human-in-the-loop/index.md) (1 shared tag)
 - [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) (1 shared tag)
 - [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) (1 shared tag)
-- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (1 shared tag)
 - [Agents as Tools with Strands Agents SDK](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) (1 shared tag)
 - [Interrupts](/docs/user-guide/concepts/interrupts/index.md) (1 shared tag)
+- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (1 shared tag)
 
 Source: https://strandsagents.com/docs/user-guide/concepts/model-providers/custom_model_provider/index.md
 
@@ -21812,7 +22038,7 @@ model = OpenAIResponsesModel(
 )
 
 agent = Agent(model=model)
-response = agent("Using deepwiki, what language is the strands-agents/sdk-python repo written in?")
+response = agent("Using deepwiki, what language is the strands-agents/harness-sdk repo written in?")
 ```
 (( /tab "Python" ))
 
@@ -21835,7 +22061,7 @@ const model = new OpenAIModel({
 
 const agent = new Agent({ model })
 const response = await agent.invoke(
-  'Using deepwiki, what language is the strands-agents/sdk-typescript repo written in?'
+  'Using deepwiki, what language is the strands-agents/harness-sdk repo written in?'
 )
 ```
 (( /tab "TypeScript" ))
@@ -23283,7 +23509,7 @@ The A2A client tool provides three main capabilities:
 If you encounter bugs or need to request features for A2A support:
 
 1.  Check the [A2A documentation](https://a2aproject.github.io/A2A/latest/) for protocol-specific issues
-2.  Report Strands-specific issues on GitHub: [Python SDK](https://github.com/strands-agents/sdk-python/issues/new/choose) or [TypeScript SDK](https://github.com/strands-agents/sdk-typescript/issues/new/choose)
+2.  Report Strands-specific issues on [GitHub](https://github.com/strands-agents/harness-sdk/issues/new/choose)
 3.  Include relevant error messages and code samples in your reports
 
 ## Related pages
@@ -23735,7 +23961,7 @@ The [Teacher’s Assistant](/docs/examples/python/multi_agent_example/multi_agen
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
-The [Agents as Tools](https://github.com/strands-agents/sdk-typescript/tree/main/strands-ts/examples/agents-as-tools) example demonstrates an orchestrator agent that routes student queries to specialized tool agents for math, English, computer science, and general knowledge.
+The [Agents as Tools](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts/examples/agents-as-tools) example demonstrates an orchestrator agent that routes student queries to specialized tool agents for math, English, computer science, and general knowledge.
 (( /tab "TypeScript" ))
 
 ## Related pages
@@ -23745,8 +23971,8 @@ The [Agents as Tools](https://github.com/strands-agents/sdk-typescript/tree/main
 - [Graph Multi-Agent Pattern](/docs/user-guide/concepts/multi-agent/graph/index.md) (1 shared tag)
 - [Multi-agent Patterns](/docs/user-guide/concepts/multi-agent/multi-agent-patterns/index.md) (1 shared tag)
 - [Swarm Multi-Agent Pattern](/docs/user-guide/concepts/multi-agent/swarm/index.md) (1 shared tag)
-- [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
 - [Community Built Tools](/docs/user-guide/concepts/tools/community-tools-package/index.md) (1 shared tag)
+- [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
 - [Creating Custom Tools](/docs/user-guide/concepts/tools/custom-tools/index.md) (1 shared tag)
 - [Vended Tools](/docs/user-guide/concepts/tools/vended-tools/index.md) (1 shared tag)
 - [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (1 shared tag)
@@ -26242,11 +26468,11 @@ class AsyncConfigPlugin implements Plugin {
 
 - [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) (2 shared tags)
 - [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) (2 shared tags)
-- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (2 shared tags)
 - [Interrupts](/docs/user-guide/concepts/interrupts/index.md) (2 shared tags)
+- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (2 shared tags)
+- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (1 shared tag)
 - [Bidirectional Streaming Hooks](/docs/user-guide/concepts/bidirectional-streaming/hooks/index.md) (1 shared tag)
 - [Retry Strategies](/docs/user-guide/concepts/agents/retry-strategies/index.md) (1 shared tag)
-- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (1 shared tag)
 - [Steering](/docs/user-guide/concepts/plugins/steering/index.md) (1 shared tag)
 - [Context Offloader](/docs/user-guide/concepts/plugins/context-offloader/index.md) (1 shared tag)
 
@@ -30156,17 +30382,18 @@ Cancellation works identically in both modes. Call `agent.cancel()` to request c
 
 ## Custom Executors
 
-Custom tool executors are not currently supported but are planned for a future release. You can track progress on this feature at [GitHub Issue #762](https://github.com/strands-agents/sdk-python/issues/762).
+Custom tool executors are not currently supported but are planned for a future release. You can track progress on this feature at [GitHub Issue #762](https://github.com/strands-agents/harness-sdk/issues/762).
 
 ## Related pages
 
 - [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) (2 shared tags)
 - [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) (2 shared tags)
-- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (2 shared tags)
 - [Interrupts](/docs/user-guide/concepts/interrupts/index.md) (2 shared tags)
 - [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
+- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (2 shared tags)
 - [Plugins](/docs/user-guide/concepts/plugins/index.md) (1 shared tag)
 - [Retry Strategies](/docs/user-guide/concepts/agents/retry-strategies/index.md) (1 shared tag)
+- [Human in the Loop](/docs/user-guide/concepts/agents/human-in-the-loop/index.md) (1 shared tag)
 - [Agents as Tools with Strands Agents SDK](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) (1 shared tag)
 
 Source: https://strandsagents.com/docs/user-guide/concepts/tools/executors/index.md
@@ -30888,7 +31115,7 @@ await agent.invoke('Replace "debug": false with "debug": true in /tmp/config.jso
 await agent.invoke('View lines 1-10 of /tmp/config.json')
 ```
 
-📖 [Full API Reference](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/vended-tools/file-editor/README.md)
+📖 [Full API Reference](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/vended-tools/file-editor/README.md)
 
 ---
 
@@ -30917,7 +31144,7 @@ await agent.invoke('Get data from https://api.example.com/users')
 await agent.invoke('Post {"name": "John"} to https://api.example.com/users')
 ```
 
-📖 [Full API Reference](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/vended-tools/http-request/README.md)
+📖 [Full API Reference](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/vended-tools/http-request/README.md)
 
 ---
 
@@ -30968,7 +31195,7 @@ const restoredAgent = new Agent({ tools: [notebook], sessionManager: session })
 await restoredAgent.invoke('Read the ideas notebook')
 ```
 
-📖 [Full API Reference](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/vended-tools/notebook/README.md)
+📖 [Full API Reference](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/vended-tools/notebook/README.md)
 
 ---
 
@@ -31016,7 +31243,7 @@ await agent.invoke('Restart the bash session')
 await agent.invoke('Run: echo $MY_VAR') // Variable will be empty
 ```
 
-📖 [Full API Reference](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/vended-tools/bash/README.md)
+📖 [Full API Reference](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/vended-tools/bash/README.md)
 
 ---
 
@@ -31050,7 +31277,7 @@ await agent.invoke(
 
 ## Versioning & Maintenance
 
-Vended tools ship as part of the SDK and are updated alongside it. Report bugs and feature requests in the [TypeScript SDK GitHub repository](https://github.com/strands-agents/sdk-typescript/issues).
+Vended tools ship as part of the SDK and are updated alongside it. Report bugs and feature requests in the [GitHub repository](https://github.com/strands-agents/harness-sdk/issues).
 
 Tool names are stable and will not change. In minor versions, a tool’s description, spec, or parameters may be updated to improve effectiveness — these changes are noted in SDK release notes. Pin your SDK version and test after upgrades if your workflows depend on specific tool behavior.
 
@@ -34045,7 +34272,7 @@ aws logs tail /aws/bedrock-agentcore/runtimes/my-agent-service-XXXXXXXXXX-DEFAUL
 ## Additional Resources
 
 -   [Amazon Bedrock AgentCore Runtime Documentation](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html)
--   [Strands TypeScript SDK Repository](https://github.com/strands-agents/sdk-typescript)
+-   [Strands TypeScript SDK Repository](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts)
 -   [Express.js Documentation](https://expressjs.com/)
 -   [Docker Documentation](https://docs.docker.com/)
 -   [AWS IAM Documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html)
@@ -48468,12 +48695,12 @@ Next we’ll install the `strands-agents` SDK package:
 pip install strands-agents
 ```
 
-The Strands Agents SDK additionally offers the [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) ([GitHub](https://github.com/strands-agents/tools)) and [`strands-agents-builder`](https://pypi.org/project/strands-agents-builder/) ([GitHub](https://github.com/strands-agents/agent-builder)) packages for development. The [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) package is a community-driven project that provides a set of tools for your agents to use, bridging the gap between large language models and practical applications. The [`strands-agents-builder`](https://pypi.org/project/strands-agents-builder/) package provides an agent that helps you to build your own Strands agents and tools.
+The Strands Agents SDK additionally offers the [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) ([GitHub](https://github.com/strands-agents/tools)) package for development. The [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) package is a community-driven project that provides a set of tools for your agents to use, bridging the gap between large language models and practical applications.
 
-Let’s install those development packages too:
+Let’s install that development package too:
 
 ```bash
-pip install strands-agents-tools strands-agents-builder
+pip install strands-agents-tools
 ```
 
 ### Strands MCP Server (Optional)
@@ -48987,7 +49214,6 @@ Ready to learn more? Check out these resources:
 
 -   [Examples](/docs/examples/index.md) - Examples for many use cases, multi-agent systems, autonomous agents, and more
 -   [Community Supported Tools](/docs/user-guide/concepts/tools/community-tools-package/index.md) - The `strands-agents-tools` package provides many powerful example tools for your agents to use during development
--   [Strands Agent Builder](https://github.com/strands-agents/agent-builder) - Use the accompanying `strands-agents-builder` agent builder to harness the power of LLMs to generate your own tools and agents
 -   [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) - Learn how Strands agents work under the hood
 -   [State & Sessions](/docs/user-guide/concepts/agents/state/index.md) - Understand how agents maintain context and state across a conversation or workflow
 -   [Multi-agent](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) - Orchestrate multiple agents together as one system, with each agent completing specialized tasks
@@ -49253,8 +49479,8 @@ See the [Async Iterators](/docs/user-guide/concepts/streaming/async-iterators/in
 
 Ready to learn more? Check out these resources:
 
--   [Examples](https://github.com/strands-agents/sdk-typescript/tree/main/strands-ts/examples) - Examples for many use cases
--   [TypeScript SDK Repository](https://github.com/strands-agents/sdk-typescript/blob/main) - Explore the TypeScript SDK source code and contribute
+-   [Examples](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts/examples) - Examples for many use cases
+-   [TypeScript SDK Repository](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts) - Explore the TypeScript SDK source code and contribute
 -   [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) - Learn how Strands agents work under the hood
 -   [State](/docs/user-guide/concepts/agents/state/index.md) - Understand how agents maintain context and state across a conversation
 -   [Operating Agents in Production](/docs/user-guide/deploy/operating-agents-in-production/index.md) - Taking agents from development to production, operating them responsibly at scale
@@ -50115,13 +50341,11 @@ export const deprecated_function = () => {}
 Stay up-to-date with SDK changes through these channels:
 
 -   **Release Notes**: Check GitHub Releases for detailed changelogs
-    -   [Python SDK](https://github.com/strands-agents/sdk-python/releases)
-    -   [TypeScript SDK](https://github.com/strands-agents/sdk-typescript/releases)
+    -   [Strands SDK](https://github.com/strands-agents/harness-sdk/releases)
     -   [Evals SDK](https://github.com/strands-agents/evals/releases)
 -   **Deprecation Warnings**: Monitor warnings in application logs
 -   **GitHub Discussions**: Join conversations about proposed changes
-    -   [Python Discussions](https://github.com/strands-agents/sdk-python/discussions)
-    -   [TypeScript Discussions](https://github.com/strands-agents/sdk-typescript/discussions)
+    -   [Strands SDK Discussions](https://github.com/strands-agents/harness-sdk/discussions)
     -   [Evals Discussions](https://github.com/strands-agents/evals/discussions)
 -   **Documentation**: Migration guides are published with each major release
 
@@ -50131,8 +50355,7 @@ The Strands SDK is an open-source project that welcomes community contributions.
 
 -   **Ask Questions**: Open a GitHub Discussion in the relevant repository
 -   **Report Issues**: Submit bug reports or feature requests via GitHub Issues
-    -   [Python Issues](https://github.com/strands-agents/sdk-python/issues)
-    -   [TypeScript Issues](https://github.com/strands-agents/sdk-typescript/issues)
+    -   [Strands SDK Issues](https://github.com/strands-agents/harness-sdk/issues)
     -   [Evals Issues](https://github.com/strands-agents/evals/issues)
 -   **Contribute Code**: Review the [Contributing Guide](/docs/contribute/contributing/core-sdk/index.md) to get started
 -   **Share Feedback**: Your input on versioning and support policies helps shape the SDK’s future

@@ -405,10 +405,33 @@ Most event properties are read-only to prevent unintended modifications. However
 ### Callback Ordering
 
 (( tab "Python" ))
-After event callbacks run in reverse registration order for cleanup symmetry:
+By default, After event callbacks run in reverse registration order for cleanup symmetry. You can override this with explicit priority using the `order` option — lower values run first.
 
--   **Before**: A, B, C (registration order)
--   **After**: C, B, A (reverse registration order)
+The SDK exports convenience presets that mark where the SDK’s own hooks run, so you can position yours relative to them:
+
+-   `HookOrder.SDK_FIRST` (-100) — where the SDK’s earliest hooks run
+-   `HookOrder.DEFAULT` (0) — implicit when no order is specified
+-   `HookOrder.SDK_LAST` (100) — where the SDK’s latest hooks run
+
+These are not enforced bounds — any numeric value works. Use values beyond them (e.g. `SDK_FIRST - 1`) to run before or after the SDK’s hooks, or `float('-inf')`/`float('inf')` for guaranteed absolute ordering.
+
+```python
+from strands import Agent
+from strands.hooks import BeforeModelCallEvent, HookOrder
+
+agent = Agent()
+
+def early_hook(event: BeforeModelCallEvent) -> None:
+    print("I run first")
+
+def late_hook(event: BeforeModelCallEvent) -> None:
+    print("I run last")
+
+agent.add_hook(early_hook, order=HookOrder.SDK_FIRST)
+agent.add_hook(late_hook, order=HookOrder.SDK_LAST)
+```
+
+Within the same order group, Before events preserve registration order and After events reverse it.
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
@@ -1575,12 +1598,12 @@ const agent = new Agent({ plugins: [new LoggingPlugin()] })
 ## Related pages
 
 - [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) (3 shared tags)
-- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (3 shared tags)
 - [Interrupts](/docs/user-guide/concepts/interrupts/index.md) (3 shared tags)
-- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
+- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (3 shared tags)
 - [Plugins](/docs/user-guide/concepts/plugins/index.md) (2 shared tags)
+- [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (2 shared tags)
 - [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
 - [Retry Strategies](/docs/user-guide/concepts/agents/retry-strategies/index.md) (1 shared tag)
 - [Bidirectional Streaming Hooks](/docs/user-guide/concepts/bidirectional-streaming/hooks/index.md) (1 shared tag)
-- [Agents as Tools with Strands Agents SDK](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) (1 shared tag)
+- [Human in the Loop](/docs/user-guide/concepts/agents/human-in-the-loop/index.md) (1 shared tag)
 - [Steering](/docs/user-guide/concepts/plugins/steering/index.md) (1 shared tag)

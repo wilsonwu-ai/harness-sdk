@@ -455,7 +455,7 @@ Because `BeforeModelCallEvent` triggers before every model call including calls 
 
 ### Context Window Limit
 
-The threshold check requires the model’s context window size. The SDK auto-populates `contextWindowLimit` from built-in lookup tables ([Python](https://github.com/strands-agents/sdk-python/blob/main/src/strands/models/_defaults.py), [TypeScript](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/models/defaults.ts)) for known models. You can override it manually for models not in the lookup table:
+The threshold check requires the model’s context window size. The SDK auto-populates `contextWindowLimit` from built-in lookup tables ([Python](https://github.com/strands-agents/harness-sdk/blob/main/strands-py/src/strands/models/_defaults.py), [TypeScript](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/models/defaults.ts)) for known models. You can override it manually for models not in the lookup table:
 
 (( tab "Python" ))
 ```python
@@ -509,7 +509,7 @@ To create a custom conversation manager, implement the [`ConversationManager`](/
 4.  `register_hooks` (optional): Override this method to integrate with [hooks](/docs/user-guide/concepts/agents/hooks/index.md). This enables proactive context management patterns, such as trimming context before model calls. Always call `super().register_hooks` when overriding.
     
 
-See the [SlidingWindowConversationManager](https://github.com/strands-agents/sdk-python/blob/main/src/strands/agent/conversation_manager/sliding_window_conversation_manager.py) implementation as a reference example.
+See the [SlidingWindowConversationManager](https://github.com/strands-agents/harness-sdk/blob/main/strands-py/src/strands/agent/conversation_manager/sliding_window_conversation_manager.py) implementation as a reference example.
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
@@ -576,7 +576,7 @@ class MyManager extends ConversationManager {
 }
 ```
 
-See the [SlidingWindowConversationManager](https://github.com/strands-agents/sdk-typescript/blob/main/strands-ts/src/conversation-manager/sliding-window-conversation-manager.ts) implementation as a reference example.
+See the [SlidingWindowConversationManager](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/conversation-manager/sliding-window-conversation-manager.ts) implementation as a reference example.
 (( /tab "TypeScript" ))
 
 ## Related pages

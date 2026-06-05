@@ -1,4 +1,4 @@
-Defined in: [src/hooks/registry.ts:38](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/hooks/registry.ts#L38)
+Defined in: [src/hooks/registry.ts:38](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/hooks/registry.ts#L38)
 
 Implementation of the hook registry for managing hook callbacks. Maintains mappings between event types and callback functions.
 
@@ -14,7 +14,7 @@ Implementation of the hook registry for managing hook callbacks. Maintains mappi
 new HookRegistry(): HookRegistryImplementation;
 ```
 
-Defined in: [src/hooks/registry.ts:41](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/hooks/registry.ts#L41)
+Defined in: [src/hooks/registry.ts:41](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/hooks/registry.ts#L41)
 
 #### Returns
 
@@ -31,7 +31,7 @@ addCallback<T>(
    options?): HookCleanup;
 ```
 
-Defined in: [src/hooks/registry.ts:46](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/hooks/registry.ts#L46)
+Defined in: [src/hooks/registry.ts:46](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/hooks/registry.ts#L46)
 
 HookRegistry.addCallback
 
@@ -67,7 +67,7 @@ HookRegistry.addCallback
 invokeCallbacks<T>(event): Promise<T>;
 ```
 
-Defined in: [src/hooks/registry.ts:86](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/hooks/registry.ts#L86)
+Defined in: [src/hooks/registry.ts:86](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/hooks/registry.ts#L86)
 
 Invoke all registered callbacks for the given event. Awaits each callback, supporting both sync and async.
 

@@ -331,7 +331,7 @@ For more complex implementations, you may want to create helper methods to organ
         return None
 ```
 
-> Note: `stream` must be implemented async. If your client does not support async invocation, you may consider wrapping the relevant calls in a thread so as not to block the async event loop. For an example on how to achieve this, you can check out the [BedrockModel](https://github.com/strands-agents/sdk-python/blob/main/src/strands/models/bedrock.py) provider implementation.
+> Note: `stream` must be implemented async. If your client does not support async invocation, you may consider wrapping the relevant calls in a thread so as not to block the async event loop. For an example on how to achieve this, you can check out the [BedrockModel](https://github.com/strands-agents/harness-sdk/blob/main/strands-py/src/strands/models/bedrock.py) provider implementation.
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
@@ -768,8 +768,9 @@ The built-in `get_config` and `update_config` methods allow for the model’s co
 ## Related pages
 
 - [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (1 shared tag)
+- [Human in the Loop](/docs/user-guide/concepts/agents/human-in-the-loop/index.md) (1 shared tag)
 - [Agent Loop](/docs/user-guide/concepts/agents/agent-loop/index.md) (1 shared tag)
 - [Hooks](/docs/user-guide/concepts/agents/hooks/index.md) (1 shared tag)
-- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (1 shared tag)
 - [Agents as Tools with Strands Agents SDK](/docs/user-guide/concepts/multi-agent/agents-as-tools/index.md) (1 shared tag)
 - [Interrupts](/docs/user-guide/concepts/interrupts/index.md) (1 shared tag)
+- [Interventions](/docs/user-guide/concepts/agents/interventions/index.md) (1 shared tag)

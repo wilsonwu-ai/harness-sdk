@@ -1,4 +1,4 @@
-Defined in: [src/sandbox/types.ts:55](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L55)
+Defined in: [src/sandbox/types.ts:55](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L55)
 
 Result of command or code execution in a sandbox.
 
@@ -10,7 +10,7 @@ Result of command or code execution in a sandbox.
 readonly type: "executionResult";
 ```
 
-Defined in: [src/sandbox/types.ts:56](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L56)
+Defined in: [src/sandbox/types.ts:56](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L56)
 
 ---
 
@@ -20,7 +20,7 @@ Defined in: [src/sandbox/types.ts:56](https://github.com/strands-agents/sdk-type
 readonly exitCode: number;
 ```
 
-Defined in: [src/sandbox/types.ts:57](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L57)
+Defined in: [src/sandbox/types.ts:57](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L57)
 
 ---
 
@@ -30,7 +30,7 @@ Defined in: [src/sandbox/types.ts:57](https://github.com/strands-agents/sdk-type
 readonly stdout: string;
 ```
 
-Defined in: [src/sandbox/types.ts:58](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L58)
+Defined in: [src/sandbox/types.ts:58](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L58)
 
 ---
 
@@ -40,7 +40,7 @@ Defined in: [src/sandbox/types.ts:58](https://github.com/strands-agents/sdk-type
 readonly stderr: string;
 ```
 
-Defined in: [src/sandbox/types.ts:59](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L59)
+Defined in: [src/sandbox/types.ts:59](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L59)
 
 ---
 
@@ -50,4 +50,4 @@ Defined in: [src/sandbox/types.ts:59](https://github.com/strands-agents/sdk-type
 readonly outputFiles: OutputFile[];
 ```
 
-Defined in: [src/sandbox/types.ts:60](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/sandbox/types.ts#L60)
+Defined in: [src/sandbox/types.ts:60](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/sandbox/types.ts#L60)

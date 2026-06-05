@@ -21,7 +21,6 @@ A collection of sample implementations to help you get started with Strands Agen
 | --- | --- | --- | --- |
 | [Structured Output](/docs/examples/structured_output/index.md) | Type-safe, validated responses | ✅ | ✅ |
 | [Agents Workflows](/docs/examples/python/agents_workflows/index.md) | Sequential agent workflow pattern | ✅ |  |
-| [CLI Reference Agent](/docs/examples/python/cli-reference-agent/index.md) | Command-line reference agent | ✅ |  |
 | [File Operations](/docs/examples/python/file_operations/index.md) | File manipulation capabilities | ✅ |  |
 | [Graph Loops](/docs/examples/python/graph_loops_example/index.md) | Graph orchestration with loops | ✅ |  |
 | [Knowledge Base Agent](/docs/examples/python/knowledge_base_agent/index.md) | Knowledge base retrieval | ✅ |  |

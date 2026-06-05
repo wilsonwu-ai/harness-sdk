@@ -433,7 +433,7 @@ The [Teacher’s Assistant](/docs/examples/python/multi_agent_example/multi_agen
 (( /tab "Python" ))
 
 (( tab "TypeScript" ))
-The [Agents as Tools](https://github.com/strands-agents/sdk-typescript/tree/main/strands-ts/examples/agents-as-tools) example demonstrates an orchestrator agent that routes student queries to specialized tool agents for math, English, computer science, and general knowledge.
+The [Agents as Tools](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts/examples/agents-as-tools) example demonstrates an orchestrator agent that routes student queries to specialized tool agents for math, English, computer science, and general knowledge.
 (( /tab "TypeScript" ))
 
 ## Related pages
@@ -443,8 +443,8 @@ The [Agents as Tools](https://github.com/strands-agents/sdk-typescript/tree/main
 - [Graph Multi-Agent Pattern](/docs/user-guide/concepts/multi-agent/graph/index.md) (1 shared tag)
 - [Multi-agent Patterns](/docs/user-guide/concepts/multi-agent/multi-agent-patterns/index.md) (1 shared tag)
 - [Swarm Multi-Agent Pattern](/docs/user-guide/concepts/multi-agent/swarm/index.md) (1 shared tag)
-- [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
 - [Community Built Tools](/docs/user-guide/concepts/tools/community-tools-package/index.md) (1 shared tag)
+- [Creating a Custom Model Provider](/docs/user-guide/concepts/model-providers/custom_model_provider/index.md) (1 shared tag)
 - [Creating Custom Tools](/docs/user-guide/concepts/tools/custom-tools/index.md) (1 shared tag)
 - [Vended Tools](/docs/user-guide/concepts/tools/vended-tools/index.md) (1 shared tag)
 - [Tool Executors](/docs/user-guide/concepts/tools/executors/index.md) (1 shared tag)

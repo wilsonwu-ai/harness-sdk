@@ -1,46 +1,48 @@
 Checkpoint system for durable agent execution.
 
-Checkpoints enable crash-resilient agent workflows by capturing agent state at cycle boundaries in the agent loop. A durability provider (e.g. Temporal) can persist checkpoints and resume from them after failures.
+A `Checkpoint` is a pause-point marker emitted at agent cycle boundaries. It captures the position (which boundary fired) and the cycle index. It does **not** capture conversation state — pair with a `SessionManager` for cross-process state continuity.
 
-Two checkpoint positions per ReAct cycle:
+Positions per ReAct cycle:
 
--   after\_model: model call completed, tools not yet executed.
--   after\_tools: all tools executed, next model call pending.
+-   `after_model`: model returned tool\_use; tools have not run yet.
+-   `after_tools`: tools finished; the next model call has not happened yet.
 
-Per-tool granularity is handled by the ToolExecutor abstraction (e.g. TemporalToolExecutor routes each tool to a separate Temporal activity). The SDK checkpoint operates at cycle boundaries.
+Per-tool granularity within a cycle is the `ToolExecutor`’s responsibility.
 
-User-facing pattern (same as interrupts):
+Usage (mirrors interrupts):
 
--   Pause via stop\_reason=“checkpoint” on AgentResult
--   State via AgentResult.checkpoint field
--   Resume via checkpointResume content block in next agent() call
+-   Pause: `AgentResult` with `stop_reason="checkpoint"` and `checkpoint` populated.
+-   Resume: pass back `\{"checkpointResume": \{"checkpoint": ckpt.to_dict()}}`.
 
-V0 Known Limitations:
+Precedence:
 
--   Metrics reset on each resume call. The caller is responsible for aggregating metrics across a durable run. EventLoopMetrics reflects only the current call.
--   OpenAIResponsesModel(stateful=True) is not supported. The server-side response\_id (\_model\_state) is not captured in the snapshot.
--   When position is “after\_tools”, AgentResult.message is the assistant message that requested the tools; tool results are in the snapshot messages.
--   BeforeInvocationEvent and AfterInvocationEvent fire on every resume call, same as interrupts. Hooks counting invocations will see each resume as a separate invocation.
--   Per-tool granularity within a cycle requires a custom ToolExecutor (e.g. TemporalToolExecutor).
+-   Interrupt > checkpoint: an interrupt during a checkpointing cycle returns `stop_reason="interrupt"` and skips `after_tools`.
+-   Cancel > checkpoint: a cancel signal at either boundary returns `stop_reason="cancelled"`.
+
+**Notes**:
+
+-   Checkpoints are only emitted on tool\_use cycles. A turn with no tool calls emits no checkpoint; use a `SessionManager` for durability of every turn.
+-   `EventLoopMetrics` resets per invocation; aggregate yourself if needed.
+-   `BeforeInvocationEvent` / `AfterInvocationEvent` fire on every resume, same as interrupts.
 
 ## Checkpoint
 
 ```python
-@dataclass
+@dataclass(frozen=True)
 class Checkpoint()
 ```
 
 Defined in: [src/strands/experimental/checkpoint/checkpoint.py:46](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/experimental/checkpoint/checkpoint.py#L46)
 
-Pause point in the agent loop. Treat as opaque — pass back to resume.
+Pause-point marker. Treat as opaque — pass back to resume.
 
 **Attributes**:
 
--   `position` - What just completed (after\_model or after\_tools).
--   `cycle_index` - Which ReAct loop cycle (0-based).
--   `snapshot` - Serialized agent state as a dict, produced by `Snapshot.to_dict()`. Stored as `dict[str, Any]` (not a `Snapshot` object) because checkpoints must be JSON-serializable for cross-process persistence. The consumer reconstructs via `Snapshot.from_dict()` on resume.
--   `app_data` - Application-level internal state data. The SDK does not read or modify this. Applications can store arbitrary data needed across checkpoint boundaries (e.g. session context, workflow metadata). Separate from `Snapshot.app_data` which captures agent-state-level data managed by the SDK.
--   `schema_version` - Rejects mismatches on resume across schema versions.
+-   `position` - Which boundary fired (`after_model` or `after_tools`).
+-   `cycle_index` - ReAct loop cycle (0-based).
+-   `snapshot` - Reserved for forward extensibility (e.g. a future hook that lets callers attach agent state to the checkpoint). The SDK does not populate or read it today; it round-trips through serialization.
+-   `app_data` - Reserved for forward extensibility — caller metadata that round-trips through serialization. The SDK does not populate or read it.
+-   `schema_version` - Rejects incompatible checkpoints on resume.
 
 #### to\_dict
 
@@ -48,7 +50,7 @@ Pause point in the agent loop. Treat as opaque — pass back to resume.
 def to_dict() -> dict[str, Any]
 ```
 
-Defined in: [src/strands/experimental/checkpoint/checkpoint.py:70](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/experimental/checkpoint/checkpoint.py#L70)
+Defined in: [src/strands/experimental/checkpoint/checkpoint.py:66](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/experimental/checkpoint/checkpoint.py#L66)
 
 Serialize for persistence.
 
@@ -59,7 +61,7 @@ Serialize for persistence.
 def from_dict(cls, data: dict[str, Any]) -> "Checkpoint"
 ```
 
-Defined in: [src/strands/experimental/checkpoint/checkpoint.py:75](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/experimental/checkpoint/checkpoint.py#L75)
+Defined in: [src/strands/experimental/checkpoint/checkpoint.py:71](https://github.com/strands-agents/sdk-python/blob/main/strands-py/src/strands/experimental/checkpoint/checkpoint.py#L71)
 
 Reconstruct from a dict produced by to\_dict().
 
@@ -69,4 +71,4 @@ Reconstruct from a dict produced by to\_dict().
 
 **Raises**:
 
--   `ValueError` - If schema\_version doesn’t match the current version.
+-   `CheckpointException` - If schema\_version doesn’t match the current version.

@@ -1,4 +1,4 @@
-Defined in: [src/retry/backoff-strategy.ts:68](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/retry/backoff-strategy.ts#L68)
+Defined in: [src/retry/backoff-strategy.ts:68](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/retry/backoff-strategy.ts#L68)
 
 Constant backoff: returns the same delay for every retry.
 
@@ -14,7 +14,7 @@ Constant backoff: returns the same delay for every retry.
 new ConstantBackoff(opts?): ConstantBackoff;
 ```
 
-Defined in: [src/retry/backoff-strategy.ts:71](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/retry/backoff-strategy.ts#L71)
+Defined in: [src/retry/backoff-strategy.ts:71](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/retry/backoff-strategy.ts#L71)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/retry/backoff-strategy.ts:71](https://github.com/strands-agents
 nextDelay(ctx): number;
 ```
 
-Defined in: [src/retry/backoff-strategy.ts:75](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/retry/backoff-strategy.ts#L75)
+Defined in: [src/retry/backoff-strategy.ts:75](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/retry/backoff-strategy.ts#L75)
 
 Returns the delay in milliseconds before the next attempt.
 

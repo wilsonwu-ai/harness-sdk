@@ -1,4 +1,4 @@
-Defined in: [src/hooks/events.ts:106](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/hooks/events.ts#L106)
+Defined in: [src/hooks/events.ts:106](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/hooks/events.ts#L106)
 
 Mutable tool-use descriptor carried on tool-call hook events. Matches the shape of the tool use block the model emitted; hooks on [BeforeToolCallEvent](/docs/api/typescript/BeforeToolCallEvent/index.md) may mutate its fields (or reassign the object) to rewrite the input, id, or tool name before the tool executes.
 
@@ -10,7 +10,7 @@ Mutable tool-use descriptor carried on tool-call hook events. Matches the shape 
 name: string;
 ```
 
-Defined in: [src/hooks/events.ts:107](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/hooks/events.ts#L107)
+Defined in: [src/hooks/events.ts:107](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/hooks/events.ts#L107)
 
 ---
 
@@ -20,7 +20,7 @@ Defined in: [src/hooks/events.ts:107](https://github.com/strands-agents/sdk-type
 toolUseId: string;
 ```
 
-Defined in: [src/hooks/events.ts:108](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/hooks/events.ts#L108)
+Defined in: [src/hooks/events.ts:108](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/hooks/events.ts#L108)
 
 ---
 
@@ -30,4 +30,4 @@ Defined in: [src/hooks/events.ts:108](https://github.com/strands-agents/sdk-type
 input: JSONValue;
 ```
 
-Defined in: [src/hooks/events.ts:109](https://github.com/strands-agents/sdk-typescript/blob/e0658993e83c0a615dc91695915f48eda36ba169/strands-ts/src/hooks/events.ts#L109)
+Defined in: [src/hooks/events.ts:109](https://github.com/strands-agents/sdk-typescript/blob/00e04880c30c5ce1f76e40c164d32ce52f7b6dca/strands-ts/src/hooks/events.ts#L109)
